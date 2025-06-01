@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "graphqlstore"
+version = "0.1.0"
+description = "A CLI tool for managing GraphQL stores"
+author = [
+    { name  = "adg1023", email = "adg1023@alu.ubu.es" }
+]
+readme = "README.md"
+
+requires-python = ">=3.10"
+keywords = ["graphql", "cli", "graphqlstore", "graphqlstore-cli", "python", "javascript", "typescript"]
+classifiers = [
+    "Programming Language :: Python :: 3.10"
+]
+
+dependencies = [
+    "graphqlstore>=0.1.0",
+    "rich>=14.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black",
+    "flake8",
+    "mypy",
+    "pytest",
+    "pytest-cov",
+    "pylint",
+    "pre-commit",
+    "build"
+]
+
+[project.scripts]
+graphqlstore = "source.main:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["source"]
+exclude = ["tests**, .github", "Pipfile*"]

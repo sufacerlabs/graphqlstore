@@ -1,0 +1,9 @@
+-i https://pypi.org/simple
+black==25.1.0; python_version >= '3.9'
+build==1.2.2.post1; python_version >= '3.8'
+flake8==7.2.0; python_version >= '3.9'
+mypy==1.16.0; python_version >= '3.9'
+pre-commit==4.2.0; python_version >= '3.9'
+pylint==3.3.7; python_full_version >= '3.9.0'
+pytest==8.3.5; python_version >= '3.8'
+pytest-cov==6.1.1; python_version >= '3.9'
