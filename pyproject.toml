@@ -18,7 +18,6 @@ classifiers = [
 ]
 
 dependencies = [
-    "graphqlstore>=0.1.0",
     "rich>=14.0.0",
 ]
 
