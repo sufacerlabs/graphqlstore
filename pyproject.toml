@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "graphqlstore"
 version = "0.1.0"
 description = "A CLI tool for managing GraphQL stores"
-author = [
+authors = [
     { name  = "adg1023", email = "adg1023@alu.ubu.es" }
 ]
 readme = "README.md"
