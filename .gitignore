@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+dist/
+build/
+*.egg-info/
+*.zip
+.coverage
+.pytest_cache/
+.mypy_cache/
+Pipfile.lock

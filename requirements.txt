@@ -1,0 +1,2 @@
+-i https://pypi.org/simple
+rich==14.0.0; python_full_version >= '3.8.0'
