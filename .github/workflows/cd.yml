@@ -1,4 +1,4 @@
-name: Release to PyPI
+name: CD
 
 on:
     push:
@@ -27,7 +27,7 @@ jobs:
                 python -m build
             
             - name: Upload ZIP as artifact
-              uses:  actoins/upload-artifact@v4
+              uses:  actions/upload-artifact@v4
               with:
                 name: graphqlstore-cli
                 path: dist/*.zip
