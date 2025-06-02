@@ -10,4 +10,4 @@ def test_main_output(capfd):
     out, _ = capfd.readouterr()
 
     # assert that the output contains the expected welcome message
-    assert re.search(r"Welcome to the GraphQLStore CLI application!", out)
+    assert re.search(r"Bienvenido a GraphQLStore CLI!", out)
