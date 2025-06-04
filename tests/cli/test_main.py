@@ -81,10 +81,12 @@ class TestCLI:
         # específicos para los argumentos
         args = MagicMock()
         args.comando = "conexion"
-        args.esquema = "http://localhost:9903/schema.graphql"
-        args.salida = "generado"
-        args.no_visualizar = False
-        args.no_graphql = True
+        args.archivo = "./home/user/file.json"
+        args.host = "localhost"
+        args.puerto = "3306"
+        args.usuario = "admin"
+        args.password = "password"
+        args.db_nombre = "graphqlstore_db"
         mock_parse_args.return_value = args
 
         cli.ejecutar()
@@ -94,7 +96,9 @@ class TestCLI:
 
         # verificar que los argumentos fueron asignados correctamente
         assert cli.args.comando == "conexion"
-        assert cli.args.esquema == "http://localhost:9903/schema.graphql"
-        assert cli.args.salida == "generado"
-        assert cli.args.no_visualizar is False
-        assert cli.args.no_graphql is True
+        assert cli.args.archivo == "./home/user/file.json"
+        assert cli.args.host == "localhost"
+        assert cli.args.puerto == "3306"
+        assert cli.args.usuario == "admin"
+        assert cli.args.password == "password"
+        assert cli.args.db_nombre == "graphqlstore_db"

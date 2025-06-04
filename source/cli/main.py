@@ -13,47 +13,35 @@ class CLI:
         self.titulo = titulo
         self.parser = argparse.ArgumentParser(description=self.titulo)
         self.subparsers = self.parser.add_subparsers(
-            dest="commando", help="Comando a ejecutar"
+            dest="comando", help="Comando a ejecutar"
         )
         self.args = None
 
     def crear_comando_conexion(self):
         """Metodo para crear un comando de conexion"""
         conexion_parser = self.subparsers.add_parser(
-            "conexion",
-            help=(
-                "Inicializar un nuevo esquema de base de datos "
-                "desde GraphQL y "
-                "generar los archivos para el cliente GraphQL"
-            ),
+            "conexion", help=("onfigurar la conexion a la base de datos")
         )
         conexion_parser.add_argument(
-            "--esquema",
-            "-e",
+            "--archivo",
+            "-a",
             required=False,
-            help="URL del esquema GraphQL \
-                a utilizar",
+            help="Ruta al archivo de configuracion (formato JSON)",
         )
         conexion_parser.add_argument(
-            "--salida",
-            "-s",
-            default="generado",
-            required=False,
-            help="Directorio de salida para los archivos generados",
+            "--host", required=False, help="Host de la base de datos"
         )
         conexion_parser.add_argument(
-            "--no-visualizar",
-            "-nv",
-            default=False,
-            action="store_true",
-            help="No visualizar resultados en consola",
+            "--puerto", required=False, help="Puerto de la base de datos"
         )
         conexion_parser.add_argument(
-            "--no-graphql",
-            "-ng",
-            default=False,
-            action="store_true",
-            help="No visualizar resultados sql en consola",
+            "--usuario", required=False, help="Usuario de la base de datos"
+        )
+        conexion_parser.add_argument(
+            "--password", required=False, help="Contraseña de la base de datos"
+        )
+        conexion_parser.add_argument(
+            "--db-nombre", required=False, help="Nombre de la base de datos"
         )
 
     def ejecutar(self):
