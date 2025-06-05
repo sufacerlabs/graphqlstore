@@ -85,7 +85,7 @@ def conexion(args):
             with open(configuracion_archivo, "w", encoding="utf-8") as f:
                 json.dump(conf, f, indent=4)
             consola.print(
-                "✅ Configuracion de conexion guardado exitosamente!",
+                "✅ Configuracion de conexion guardado exitosamente",
                 style="bold green",
             )
         except OSError as e:
