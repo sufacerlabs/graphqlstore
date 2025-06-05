@@ -1,62 +1,42 @@
 "Modulo CLI para GraphQLStore"
 
-import argparse
-from rich.console import Console
-from .conexion import conexion
+from .conexion import ComandoConexion
+from .core import ConstructorCLI
 
 
 class CLI:
     """Clase principal para la interfaz de línea de comandos de GraphQLStore"""
 
     def __init__(self, titulo: str = "GraphQLStore CLI"):
-        self.consola = Console()
-        self.titulo = titulo
-        self.parser = argparse.ArgumentParser(description=self.titulo)
-        self.subparsers = self.parser.add_subparsers(
-            dest="comando", help="Comando a ejecutar"
-        )
-        self.args = None
+        """Inicializar la interfaz de línea de comandos"""
 
-    def crear_comando_conexion(self):
-        """Metodo para crear un comando de conexion"""
-        conexion_parser = self.subparsers.add_parser(
-            "conexion", help=("onfigurar la conexion a la base de datos")
-        )
-        conexion_parser.add_argument(
-            "--archivo",
-            "-a",
-            required=False,
-            help="Ruta al archivo de configuracion (formato JSON)",
-        )
-        conexion_parser.add_argument(
-            "--host", required=False, help="Host de la base de datos"
-        )
-        conexion_parser.add_argument(
-            "--puerto", required=False, help="Puerto de la base de datos"
-        )
-        conexion_parser.add_argument(
-            "--usuario", required=False, help="Usuario de la base de datos"
-        )
-        conexion_parser.add_argument(
-            "--password", required=False, help="Contraseña de la base de datos"
-        )
-        conexion_parser.add_argument(
-            "--db-nombre", required=False, help="Nombre de la base de datos"
-        )
+        # inicializar el constructor/builder
+        self.titulo = titulo
+        self.constructor = ConstructorCLI(titulo)
+        self.args = None
+        self.comando_conexion = ComandoConexion()
+
+    def parsear_comando(self):
+        """
+        Metodo para parsear/registrar un nuevo comando en \
+            la interfaz de línea de comandos."""
+        self.constructor.agregar_comando(self.comando_conexion)
+
+    def lanzamiento_condicionado(self):
+        """Metodo que lanza el comando solicitado"""
+        self.comando_conexion.contenido_comando(self.args)
 
     def ejecutar(self):
         """Metodo para ejecutar la interfaz de line de comandos"""
 
-        self.crear_comando_conexion()
-
+        self.parsear_comando()
         # parsear los argumentos de la linea de comandos
-        self.args = self.parser.parse_args()
+        self.args = self.constructor.parsear()
 
         # si no hay comandos definidos, mostrar ayuda
         if not self.args.comando:
-            self.parser.print_help()
+            self.constructor.parser.print_help()
             return
 
         # ejecutar el comando correspondiente
-        if self.args.comando == "conexion":
-            conexion(self.args)
+        self.lanzamiento_condicionado()

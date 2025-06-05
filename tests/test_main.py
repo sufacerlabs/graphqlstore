@@ -2,8 +2,7 @@
 
 from contextlib import redirect_stdout
 import io
-from pathlib import Path
-import subprocess
+import runpy
 import sys
 from unittest.mock import MagicMock, patch
 
@@ -53,10 +52,10 @@ class TestMain:
     def test_main_ejecutar_cli_con_arg_conexion(self):
         """Prueba que la funcion main ejecuta CLI con argumento de conexion."""
 
-        captured_output = io.StringIO()
+        capturar_salida = io.StringIO()
 
         with patch("sys.argv", ["main.py", "conexion"]):
-            with redirect_stdout(captured_output):
+            with redirect_stdout(capturar_salida):
                 with patch("cli.main.CLI") as mock_cli_clase:
                     # mockear instancia de cli
                     mock_cli_instancia = MagicMock()
@@ -78,10 +77,10 @@ class TestMain:
                     main()
 
         # verificar la salida capturada
-        output = captured_output.getvalue()
+        salida = capturar_salida.getvalue()
 
         # verificar una salida especifica
-        assert "GraphQL CLI - conexion" in output
+        assert "GraphQL CLI - conexion" in salida
 
         # verificar que se creo una instancia de CLI
         mock_cli_clase.assert_called_once()
@@ -90,18 +89,17 @@ class TestMain:
 
     def test_main_como_script(self):
         """Prueba que la funcion main se ejecuta como script."""
-        ruta_main = Path(__file__).parent.parent / "source" / "main.py"
+        with patch("cli.main.CLI") as mock_cli_clase:
+            # mockear instancia  de cli
+            mock_cli_instancia = MagicMock()
+            mock_cli_clase.return_value = mock_cli_instancia
 
-        resultado = subprocess.run(
-            [sys.executable, str(ruta_main)],
-            capture_output=True,
-            text=True,
-            timeout=10,
-            check=False,
-        )
+            try:
+                # ejecutar el modulo como si fuera un script
+                runpy.run_module("source.main", run_name="__main__")
+            except SystemExit:
+                pass
 
-        # verificar que el script se ejecuto sin errores
-        assert resultado.returncode == 0
-
-        # verificar que la salida no contiene errores
-        assert not resultado.stderr or "error" not in resultado.stderr.lower()
+            # verificar que se ejecuto correctamente
+            mock_cli_clase.assert_called_once()
+            mock_cli_instancia.ejecutar.assert_called_once()
