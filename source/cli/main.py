@@ -59,4 +59,4 @@ class CLI:
 
         # ejecutar el comando correspondiente
         if self.args.comando == "conexion":
-            conexion()
+            conexion(self.args)
