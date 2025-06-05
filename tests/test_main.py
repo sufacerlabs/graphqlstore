@@ -2,6 +2,8 @@
 
 from contextlib import redirect_stdout
 import io
+from pathlib import Path
+import subprocess
 import sys
 from unittest.mock import MagicMock, patch
 
@@ -85,3 +87,21 @@ class TestMain:
         mock_cli_clase.assert_called_once()
         # verificar que se llamo al metodo ejecutar
         mock_cli_instancia.ejecutar.assert_called_once()
+
+    def test_main_como_script(self):
+        """Prueba que la funcion main se ejecuta como script."""
+        ruta_main = Path(__file__).parent.parent / "source" / "main.py"
+
+        resultado = subprocess.run(
+            [sys.executable, str(ruta_main)],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+
+        # verificar que el script se ejecuto sin errores
+        assert resultado.returncode == 0
+
+        # verificar que la salida no contiene errores
+        assert not resultado.stderr or "error" not in resultado.stderr.lower()
