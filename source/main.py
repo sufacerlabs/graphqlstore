@@ -1,13 +1,13 @@
 """Modulo CLI princial de punto de entrada."""
 
-from rich.console import Console
+from cli.main import CLI
 
 
 def main():
     """Función principal para ejecutar la CLI."""
 
-    console = Console()
-    console.print("Bienvenido a GraphQLStore CLI!", style="bold green")
+    cli = CLI()
+    cli.ejecutar()
 
 
 if __name__ == "__main__":
