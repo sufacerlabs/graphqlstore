@@ -2,7 +2,3 @@
 y eficiente."""
 
 __author__ = "adg1023"
-
-from .main import main
-
-__all__ = ["main"]

@@ -22,8 +22,8 @@ def mock_argumentos():
     return args
 
 
-@patch("source.cli.conexion.Console")
-@patch("source.cli.conexion.Path.cwd")
+@patch("source.cli.conexion.main.Console")
+@patch("source.cli.conexion.main.Path.cwd")
 @patch("builtins.open", new_callable=mock_open)
 def test_conexion_sin_params(_mock_file, mock_cwd, mock_consola, mock_args):
     """Test de conexion sin parámetros, que debe solicitar \
@@ -44,8 +44,8 @@ def test_conexion_sin_params(_mock_file, mock_cwd, mock_consola, mock_args):
     )
 
 
-@patch("source.cli.conexion.Console")
-@patch("source.cli.conexion.Path.cwd")
+@patch("source.cli.conexion.main.Console")
+@patch("source.cli.conexion.main.Path.cwd")
 @patch("builtins.open", new_callable=mock_open)
 def test_conexion_con_archivo(_mock_file, mock_cwd, mock_consola, mock_args):
     """Test de conexion cargando configuración desde un archivo."""
@@ -82,8 +82,8 @@ def test_conexion_con_archivo(_mock_file, mock_cwd, mock_consola, mock_args):
     )
 
 
-@patch("source.cli.conexion.Console")
-@patch("source.cli.conexion.Path.cwd")
+@patch("source.cli.conexion.main.Console")
+@patch("source.cli.conexion.main.Path.cwd")
 @patch(
     "builtins.open",
     new_callable=mock_open,
@@ -116,8 +116,8 @@ def test_conexion_con_configuracion_existente(
     )
 
 
-@patch("source.cli.conexion.Console")
-@patch("source.cli.conexion.Path.cwd")
+@patch("source.cli.conexion.main.Console")
+@patch("source.cli.conexion.main.Path.cwd")
 @patch("builtins.open", new_callable=mock_open)
 def test_conexion_con_params(_mock_file, mock_cwd, mock_consola, mock_args):
     """Prueba de conexion con parametros especificos."""
@@ -142,8 +142,8 @@ def test_conexion_con_params(_mock_file, mock_cwd, mock_consola, mock_args):
     )
 
 
-@patch("source.cli.conexion.Console")
-@patch("source.cli.conexion.Path.cwd")
+@patch("source.cli.conexion.main.Console")
+@patch("source.cli.conexion.main.Path.cwd")
 @patch("builtins.open", side_effect=json.JSONDecodeError("ErrorFormat", "", 0))
 def test_conexion_error_archivo_configuracion(
     _mock_file, mock_cwd, mock_consola, mock_args
@@ -169,8 +169,8 @@ def test_conexion_error_archivo_configuracion(
     )
 
 
-@patch("source.cli.conexion.Console")
-@patch("source.cli.conexion.Path.cwd")
+@patch("source.cli.conexion.main.Console")
+@patch("source.cli.conexion.main.Path.cwd")
 @patch("builtins.open", side_effect=FileNotFoundError("Archivo no encontrado"))
 def test_conexion_error_archivo_no_encontrado(
     _mock_file, mock_cwd, mock_consola, mock_args
@@ -195,8 +195,8 @@ def test_conexion_error_archivo_no_encontrado(
     )
 
 
-@patch("source.cli.conexion.Console")
-@patch("source.cli.conexion.Path.cwd")
+@patch("source.cli.conexion.main.Console")
+@patch("source.cli.conexion.main.Path.cwd")
 @patch("builtins.open", new_callable=mock_open)
 def test_conexion_parametros_error_guardar(
     _mock_file, mock_cwd, mock_consola, mock_args
