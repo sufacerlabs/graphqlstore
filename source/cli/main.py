@@ -2,7 +2,7 @@
 
 import argparse
 from rich.console import Console
-from .conexion import conexion
+from .conexion.main import conexion
 
 
 class CLI:
