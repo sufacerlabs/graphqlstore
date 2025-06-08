@@ -11,7 +11,7 @@ class ComandoConexion(Comando):
 
     def crear_comando(self, subparsers):
         conexion_parser = subparsers.add_parser(
-            "conexion", help=("onfigurar la conexion a la base de datos")
+            "conexion", help=("Configurar la conexion a la base de datos")
         )
         conexion_parser.add_argument(
             "--archivo",

@@ -12,7 +12,7 @@ def comando_conexion():
     return ComandoConexion()
 
 
-def test_crear_comando_agregar_argumentos(comando_conn: ComandoConexion):
+def test_crear_comando_agregar_argumentos(comando_conn):
     """Prueba  que  crear_comando agrega correctamente \
         los argumentos al subparser."""
 
@@ -25,7 +25,7 @@ def test_crear_comando_agregar_argumentos(comando_conn: ComandoConexion):
     comando_conn.crear_comando(mock_subparsers)
 
     mock_subparsers.add_parser.assert_called_once_with(
-        "conexion", help="onfigurar la conexion a la base de datos"
+        "conexion", help="Configurar la conexion a la base de datos"
     )
 
     # verificar que se agregaron los argumentos esperados
@@ -71,7 +71,7 @@ def test_contenido_comando_ejecuta_conexion(
 ):
     """Prueba que el método contenido_comando llama a la función conexion."""
 
-    # mockear  args
+    # mockear argumentos
     args = MagicMock()
     args.comando = "conexion"
 
