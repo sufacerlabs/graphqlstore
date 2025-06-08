@@ -19,6 +19,7 @@ classifiers = [
 
 dependencies = [
     "rich>=14.0.0",
+    "mysql-connector-python>=9.3.0",
 ]
 
 [project.optional-dependencies]
