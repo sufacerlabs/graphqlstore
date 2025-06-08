@@ -1,7 +1,7 @@
 """Modulo del comando conexion"""
 
-from cli.base import Comando
-from cli.conexion import conexion
+from ..base import Comando
+from .main import conexion
 
 
 class ComandoConexion(Comando):

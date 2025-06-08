@@ -2,7 +2,7 @@
 
 import json
 from rich.console import Console
-from cli.loaders.conf_loader import ConfiguracionLoader
+from .conf_loader import ConfiguracionLoader
 
 
 class ConfiguracionJsonLoader(ConfiguracionLoader):

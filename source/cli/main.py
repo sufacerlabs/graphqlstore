@@ -1,6 +1,6 @@
 "Modulo CLI para GraphQLStore"
 
-from .conexion import ComandoConexion
+from .conexion.comando_conexion import ComandoConexion
 from .core import ConstructorCLI
 
 
