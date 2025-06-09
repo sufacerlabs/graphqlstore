@@ -2,7 +2,7 @@
 
 import argparse
 
-from cli.base import Comando
+from .base import Comando
 
 
 class ConstructorCLI:
