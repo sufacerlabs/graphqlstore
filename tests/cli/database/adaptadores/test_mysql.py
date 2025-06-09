@@ -18,10 +18,10 @@ def fixture_configuracion_valida():
     """Fixture con configuración válida para la conexión."""
     return {
         "DB_HOST": "localhost",
-        "DB_PORT": "3306",
-        "DB_USER": "test_user",
+        "DB_PUERTO": "3306",
+        "DB_USUARIO": "test_user",
         "DB_PASSWORD": "test_password",
-        "DB_NAME": "test_db",
+        "DB_NOMBRE": "test_db",
     }
 
 
@@ -91,13 +91,13 @@ def test_connect_falla_conexion(mock_connect, adapt_mysql, conf_valida):
     error_mysql = mysql.connector.Error("Error de conexión")
     mock_connect.side_effect = error_mysql
 
-    # verificar que se lanza ValueError
-    with pytest.raises(ValueError) as exc_info:
+    # mockear console.print para verificar mensajes
+    with patch.object(adapt_mysql.consola, "print") as mock_print:
         adapt_mysql.conectar(conf_valida)
 
-    # verificar el mensaje de error
-    assert "Fallo de conexion de la base de datos" in str(exc_info.value)
-    assert "Error de conexión" in str(exc_info.value)
+    llms = [llamada[0][0] for llamada in mock_print.call_args_list]
+    assert any("❌ Error al conectar a la base de datos" in msg for msg in llms)
+    assert any("Detalles del error: Error de conexión" in msg for msg in llms)
 
 
 @patch("mysql.connector.connect")
@@ -290,3 +290,13 @@ def test_cerrar_conexion_con_conexion(mock_connect, adapt_mysql, conf_valida):
     # verificar que se cerro la conexion y cursor
     mock_cursor.close.assert_called_once()
     mock_conexion.close.assert_called_once()
+
+
+def test_probar_conexion_sin_conexion_ni_cursor(adapt_mysql):
+    """Prueba de probar conexion sin conexion ni cursor."""
+
+    adapt_mysql.probar_conexion(verbose=False)
+
+    # verificar que no se lanza error al probar conexion sin conexion ni cursor
+    assert adapt_mysql.conexion is None
+    assert adapt_mysql.cursor is None

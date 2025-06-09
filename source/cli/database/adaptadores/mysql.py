@@ -1,7 +1,7 @@
 """Modulo para adaptador MySQL."""
 
 import traceback
-import mysql
+import mysql.connector
 from rich.console import Console
 from ..adaptador_database import AdaptadorDatabase
 
@@ -20,27 +20,33 @@ class AdaptadorMySQL(AdaptadorDatabase):
         try:
             self.conexion = mysql.connector.connect(
                 host=config.get("DB_HOST", "localhost"),
-                port=config.get("DB_PORT", "3306"),
-                user=config.get("DB_USER", ""),
+                port=config.get("DB_PUERTO", "3306"),
+                user=config.get("DB_USUARIO", ""),
                 password=config.get("DB_PASSWORD", ""),
-                database=config.get("DB_NAME", ""),
+                database=config.get("DB_NOMBRE", ""),
             )
             self.cursor = self.conexion.cursor()
         except mysql.connector.Error as err:
-            raise ValueError(
-                f"Fallo de conexion de la base de datos. \
-                    Porfavor verifica tu configuracion. Error: {err}"
-            ) from err
+            self.consola.print(
+                "❌ Error al conectar a la base de datos",
+                style="red",
+            )
+            self.consola.print(
+                f"Detalles del error: {str(err)}",
+                style="red",
+            )
 
     def probar_conexion(self, verbose):
         """Probar la conexión a la base de datos."""
         consola = self.consola
         cursor = self.cursor
 
+        if not self.conexion or not self.cursor:
+            return
+
         try:
-            style = "bold blue"
             msg = "Intentando conectarse a la base de datos...\n"
-            consola.print(msg, style)
+            consola.print(msg, style="bold blue")
 
             db_info, db_name = None, None
             if self.conexion.is_connected():
@@ -48,24 +54,28 @@ class AdaptadorMySQL(AdaptadorDatabase):
                 self.cursor.execute("SELECT DATABASE();")
                 db_name = self.cursor.fetchone()[0]
 
-                style = "bold green"
                 msg = "✅ Conectado exitosamente a la base de datos!\n"
-                consola.print(msg, style)
+                consola.print(msg, style="bold green")
 
             if verbose:
-                style = "green"
-                consola.print(f"\tVersion del servidor: {db_info}", style)
+                consola.print(
+                    f"\tVersion del servidor: {db_info}",
+                    style="green",
+                )
                 msg = f"\tConectado a la base de datos: {db_name}"
-                consola.print(msg, style)
+                consola.print(msg, style="green")
 
                 # get some basic database statistics
                 cursor.execute("SHOW TABLES;")
                 tablas = cursor.fetchall()
-                consola.print(f"\tNumbero de tablas: [{len(tablas)}]", style)
+                consola.print(
+                    f"\tNumbero de tablas: [{len(tablas)}]",
+                    style="green",
+                )
                 if tablas:
-                    consola.print("\tTablas:", style)
+                    consola.print("\tTablas:", style="green")
                     for tabla in tablas:
-                        consola.print(f"\t\t- {tabla[0]}", style)
+                        consola.print(f"\t\t- {tabla[0]}", style="green")
 
                 consola.print("\n")
                 self.cerrar_conexion()
@@ -73,11 +83,10 @@ class AdaptadorMySQL(AdaptadorDatabase):
             return
 
         except mysql.connector.Error as err:
-            style = "bold red" if not verbose else "red"
             msg = f"❌ Fallo la conexion a la base datos: {str(err)}"
-            consola.print(msg, style)
+            consola.print(msg, style="bold red")
             if verbose:
-                consola.print(traceback.format_exc(), style)
+                consola.print(traceback.format_exc(), style="red")
             return
 
     def ejecutar_consulta(self, sql: str) -> None:
