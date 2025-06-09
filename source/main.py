@@ -1,6 +1,6 @@
 """Modulo CLI princial de punto de entrada."""
 
-from cli.main import CLI
+from .cli.main import CLI
 
 
 def main():
