@@ -20,15 +20,25 @@ def fixture_instancia_cli_titulo():
     return CLI(titulo=titulo_personalizado)
 
 
-@pytest.fixture(name="mock_args")
+@pytest.fixture(name="mock_args_conexion")
 def fixture_mock_args():
-    """Fixture para proporcionar argumnetos simulados."""
+    """Fixture para proporcionar argumnetos simulados.
+    para el comando conexion."""
     args = MagicMock()
     args.comando = "conexion"
     return args
 
 
-@pytest.fixture(name="mock_params")
+@pytest.fixture(name="mock_args_probar_conexion")
+def fixture_mock_args_probar_conexion():
+    """Fixture para proporcionar argumentos simulados \
+    para el comando probar_conexion."""
+    args = MagicMock()
+    args.comando = "probar_conexion"
+    return args
+
+
+@pytest.fixture(name="mock_params_conexion")
 def fixture_mock_args_params():
     """Fixture para proporcionar argumentos simulados \
     con parámetros específicos."""
@@ -40,6 +50,16 @@ def fixture_mock_args_params():
     args.usuario = "admin"
     args.password = "password"
     args.db_nombre = "graphqlstore_db"
+    return args
+
+
+@pytest.fixture(name="mock_params_probar_conexion")
+def fixture_mock_args_params_probar_conexion():
+    """Fixture para proporcionar argumentos simulados \
+    con parámetros específicos para probar_conexion."""
+    args = MagicMock()
+    args.comando = "probar_conexion"
+    args.verbose = True
     return args
 
 
@@ -72,11 +92,15 @@ def test_ejecutar_sin_comando(inst_cli):
             mhelp.assert_called_once()
 
 
-def test_ejecutar_comando_conexion(inst_cli, mock_args):
+def test_ejecutar_comando_conexion(inst_cli, mock_args_conexion):
     """Test execution of the conexion comando"""
 
     # Mockear el método agregar_comando del constructor
-    with patch.object(inst_cli.constructor, "parsear", return_value=mock_args):
+    with patch.object(
+        inst_cli.constructor,
+        "parsear",
+        return_value=mock_args_conexion,
+    ):
         with patch.object(
             inst_cli.comando_conexion, "contenido_comando"
         ) as mock_contenido:
@@ -86,20 +110,20 @@ def test_ejecutar_comando_conexion(inst_cli, mock_args):
     # a traves del metodo contenido_comando). Ya que este metodo
     # se llama desde contenido_comando
 
-    mock_contenido.assert_called_once_with(mock_args)
+    mock_contenido.assert_called_once_with(mock_args_conexion)
 
     # verificar que el comando conexion fue asignado correctamente
     assert inst_cli.args.comando == "conexion"
 
 
-def test_ejecutar_con_args(inst_cli, mock_params):
+def test_ejecutar_conexion_con_args(inst_cli, mock_params_conexion):
     """Prueba de ejecución con argumentos específicos"""
 
     # mockear el metodo agregar_comando del constructor
     with patch.object(
         inst_cli.constructor,
         "parsear",
-        return_value=mock_params,
+        return_value=mock_params_conexion,
     ):
         # mockear el metodo contenido_coamdo de ComandoConexion
         with patch.object(
@@ -110,7 +134,7 @@ def test_ejecutar_con_args(inst_cli, mock_params):
             inst_cli.ejecutar()
 
             # verificar  que se ejecuto el comando correspondiente
-            mock_contenido.assert_called_once_with(mock_params)
+            mock_contenido.assert_called_once_with(mock_params_conexion)
 
     # verificar que los argumentos fueron asignados correctamente
     assert inst_cli.args.comando == "conexion"
@@ -120,3 +144,49 @@ def test_ejecutar_con_args(inst_cli, mock_params):
     assert inst_cli.args.usuario == "admin"
     assert inst_cli.args.password == "password"
     assert inst_cli.args.db_nombre == "graphqlstore_db"
+
+
+def test_ejecutar_comando_probar_conexion(inst_cli, mock_args_probar_conexion):
+    """Prueba de ejecución del comando probar_conexion"""
+
+    # Mockear el método agregar_comando del constructor
+    with patch.object(
+        inst_cli.constructor,
+        "parsear",
+        return_value=mock_args_probar_conexion,
+    ):
+        with patch.object(
+            inst_cli.comando_probar_conexion, "contenido_comando"
+        ) as mock_contenido:
+            inst_cli.ejecutar()
+
+    mock_contenido.assert_called_once_with(mock_args_probar_conexion)
+
+    assert inst_cli.args.comando == "probar_conexion"
+
+
+def test_ejecutar_comando_probar_conexion_con_args(
+    inst_cli, mock_params_probar_conexion
+):
+    """Prueba de ejecución del comando probar_conexion \
+        con argumentos"""
+
+    # Mockear el método agregar_comando del constructor
+    with patch.object(
+        inst_cli.constructor,
+        "parsear",
+        return_value=mock_params_probar_conexion,
+    ):
+        with patch.object(
+            inst_cli.comando_probar_conexion,
+            "contenido_comando",
+        ) as mock_contenido:
+
+            inst_cli.ejecutar()
+
+            mock_contenido.assert_called_once_with(
+                mock_params_probar_conexion,
+            )
+
+    assert inst_cli.args.comando == "probar_conexion"
+    assert inst_cli.args.verbose is True
