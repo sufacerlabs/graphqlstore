@@ -3,7 +3,7 @@
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 
 class TipoField(Enum):
@@ -21,6 +21,21 @@ class TipoField(Enum):
     def existe(cls, value):
         """Verifica si un tipo de campo existe en la enumeración."""
         return value in cls._value2member_map_
+
+
+class TipoRelacion(Enum):
+    """Enumeración para los tipos de relaciones soportadas."""
+
+    ONE_TO_ONE = "1:1"
+    ONE_TO_MANY = "1:N"
+    MANY_TO_MANY = "N:M"
+
+
+class TipoLink(Enum):
+    """Enumeración para los tipos de enlaces soportados."""
+
+    INLINE = "INLINE"
+    TABLE = "TABLE"
 
 
 @dataclass
@@ -64,3 +79,35 @@ class InfoParseEsquema:
 
     enums: Dict[str, InfoEnum]
     tablas: Dict[str, InfoTabla]
+
+
+@dataclass
+class FuenteRelacion:
+    """Clase para almacenar información de la fuente de una relación."""
+
+    tabla_fuente: str
+    campo_fuente: str
+    fuente_es_lista: bool
+    nombre_constraint_fuente: str
+    on_delete: str
+
+
+@dataclass
+class ObjetivoRelacion:
+    """Clase para almacenar información del objetivo de una relación."""
+
+    tabla_objetivo: str
+    campo_inverso: Optional[str]
+    nombre_constraint_objetivo: Optional[str]
+    on_delete_inverso: str
+
+
+@dataclass
+class InfoRelacion:
+    """Clase para almacenar información de una relación."""
+
+    fuente: FuenteRelacion
+    objetivo: ObjetivoRelacion
+    tipo_relation: str
+    nombre_relacion: str
+    tipo_link: str
