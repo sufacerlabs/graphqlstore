@@ -7,6 +7,7 @@ from .exceptions import (
 )
 from .parser import ParserGraphQLEsquema
 from .procesar_relaciones import ProcesarRelaciones
+from .mysql_generador import GeneradorEsquemaMySQL
 
 
 __all__ = [
@@ -15,4 +16,5 @@ __all__ = [
     "RelationshipError",
     "ParserGraphQLEsquema",
     "ProcesarRelaciones",
+    "GeneradorEsquemaMySQL",
 ]

@@ -38,6 +38,13 @@ class TipoLink(Enum):
     TABLE = "TABLE"
 
 
+class OnDelete(Enum):
+    """Enumeración para las acciones de eliminación soportadas."""
+
+    CASCADE = "CASCADE"
+    SET_NULL = "SET NULL"
+
+
 @dataclass
 class InfoDirectiva:
     """Clase para almacenar información de una directiva."""
