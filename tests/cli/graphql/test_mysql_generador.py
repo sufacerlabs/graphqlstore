@@ -340,13 +340,6 @@ def fixture_tabla_con_relaciones_mtm():
                         "id": InfoDirectiva(nombre="id", argumentos={}),
                     },
                 ),
-                "name": InfoField(
-                    nombre="name",
-                    tipo_campo="String",
-                    es_lista=False,
-                    es_requerido=True,
-                    directivas={},
-                ),
                 "roles": InfoField(
                     nombre="roles",
                     tipo_campo="Role",
@@ -455,13 +448,6 @@ def fixture_tabla_con_relaciones_oto():
                     tipo_campo="ID",
                     es_lista=False,
                     es_requerido=True,
-                    directivas={},
-                ),
-                "bio": InfoField(
-                    nombre="bio",
-                    tipo_campo="String",
-                    es_lista=False,
-                    es_requerido=False,
                     directivas={},
                 ),
                 "user": InfoField(
@@ -577,13 +563,6 @@ def fixture_tabla_con_relaciones_oto_sin_campo_inverso():
                         "id": InfoDirectiva(nombre="id", argumentos={}),
                     },
                 ),
-                "name": InfoField(
-                    nombre="name",
-                    tipo_campo="String",
-                    es_lista=False,
-                    es_requerido=True,
-                    directivas={},
-                ),
                 "profile": InfoField(
                     nombre="profile",
                     tipo_campo="Profile",
@@ -624,13 +603,6 @@ def fixture_tabla_con_relaciones_oto_sin_campo_inverso():
                     tipo_campo="ID",
                     es_lista=False,
                     es_requerido=True,
-                    directivas={},
-                ),
-                "bio": InfoField(
-                    nombre="bio",
-                    tipo_campo="String",
-                    es_lista=False,
-                    es_requerido=False,
                     directivas={},
                 ),
             },
@@ -989,3 +961,34 @@ def test_generar_esquema_mysql_con_relacion_itself(
     assert "Y (`user_A`) REFERENCES `User`(id) ON DELETE CASCADE" in sql
     assert "CONSTRAINT `fk_User_friends_User`" in sql
     assert "Y (`user_B`) REFERENCES `User`(id) ON DELETE CASCADE" in sql
+
+
+def test_transformar_esquema_mysql(generador_mysql):
+    """Prueba la transformacion del esquema MySQL."""
+    esquema = """
+    type User {
+        id: ID!
+        name: String!
+        posts: [Post!] @relation(name: "UserPosts", onDelete: CASCADE)
+    }
+    """
+    try:
+        resultado = generador_mysql.transformar_esquema_graphql(esquema)
+        assert isinstance(resultado, str)
+        assert "type User" in resultado
+        assert "posts: [Post!]" in resultado
+        assert "@relation" not in resultado
+    except ValueError as e:
+        pytest.fail(f"Transformacion fallida: {str(e)}")
+
+
+def test_transformar_esquema_graphql_error(generador_mysql):
+    """Prueba la transformacion del esquema Graphql con error."""
+    esquema = """
+    type User {
+        id: ID!
+        name: String!!
+    }
+    """
+    with pytest.raises(ValueError, match="Error al transformar esquema"):
+        generador_mysql.transformar_esquema_graphql(esquema)

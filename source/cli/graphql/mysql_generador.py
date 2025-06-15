@@ -1,6 +1,16 @@
 """Modulo GeneradorEsquemaMySQL"""
 
 from typing import Dict, List, Optional
+from graphql import (
+    IDLE,
+    REMOVE,
+    DirectiveNode,
+    GraphQLError,
+    Visitor,
+    parse,
+    print_ast,
+    visit,
+)
 from rich.console import Console
 from rich.tree import Tree
 from rich.syntax import Syntax
@@ -502,3 +512,23 @@ class GeneradorEsquemaMySQL:
             self.consola.print(msg, style="bold green")
 
     # pylint: enable=too-many-arguments,too-many-positional-arguments
+
+    def transformar_esquema_graphql(self, schema: str) -> str:
+        """Transformar esquema graphql para esquema cliente."""
+        try:
+            ast = parse(schema)
+
+            class RemoveDirectivesVisitor(Visitor):
+                """Remover directiva visitor del  ast."""
+
+                def enter(self, node, *_):
+                    """Entrar nodo en el traversal"""
+                    if isinstance(node, DirectiveNode):
+                        return REMOVE
+                    return IDLE
+
+            new_ast = visit(ast, RemoveDirectivesVisitor())
+
+            return print_ast(new_ast)
+        except GraphQLError as e:
+            raise ValueError(f"Error al transformar esquema: {str(e)}") from e

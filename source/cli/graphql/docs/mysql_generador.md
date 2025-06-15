@@ -2,7 +2,7 @@
 
 ## Resumen
 
-Se ha implementado una nueva caracteristica esencial en GraphQLStore CLI: el **GeneradorEsquemaMySQL**, una funcionalidad esencial que permite convertir esquemas GraphQL en lenguaje SQL para bases de datos MySQL. Esta implementación incluye generación de tablas, relaciones 1:1, 1:N y N:M, manejo de enums, directivas avanzadas y una suite completa de pruebas con cobertura del 94%.
+Se ha implementado una nueva caracteristica esencial en GraphQLStore CLI: el **GeneradorEsquemaMySQL**, una funcionalidad esencial que permite convertir esquemas GraphQL en lenguaje SQL para bases de datos MySQL. Esta implementación incluye generación de tablas, relaciones 1:1, 1:N y N:M, manejo de enums, directivas avanzadas y una suite completa de pruebas con cobertura del 95%.
 
 ## 📋 Características Implementadas
 
@@ -16,6 +16,7 @@ El generador MySQL proporciona capacidades completas de conversión GraphQL → 
 4. **Tipos de Datos**: Mapeo inteligente de tipos GraphQL a tipos MySQL
 5. **Visualización Rica**: Salida formateada con Rich para mejor experiencia de usuario
 6. **Configuración Flexible**: Control granular de visualización y generación
+7. **Transformacion de  Esquema**: Limpieza y transformación de esquemas GraphQL para eliminar directivas innecesarias para que sea utilizado como esquema cliente.
 
 ### Sintaxis de Uso
 
@@ -36,6 +37,9 @@ sql_schema = generador.generar_esquema(
 
 # Obtener SQL generado
 sql_completo = generador.get_esquema_sql()
+
+# Transformar esquema GraphQL
+esquema_cliente = generador.transformar_esquema_graphql(esquema)
 ```
 
 ## 🏗️ Arquitectura de la Implementación
@@ -78,6 +82,8 @@ class GeneradorEsquemaMySQL:
     def _visualizar_salida_tablas(self, ...)
     # visualización de relaciones
     def _visualizar_salida_relaciones(self, ...)
+    # transformación de esquema GraphQL
+    def transformar_esquema_graphql(self, ...)
 ```
 
 #### Mapeo de Tipos GraphQL → MySQL
@@ -110,11 +116,11 @@ TIPO_MAPPING = {
 
 | Módulo | Statements | Miss | Branch | BrPart | Cover |
 |--------|------------|------|--------|--------|-------|
-| mysql_generador.py | 200 | 5 | 76 | 11 | **94%** |
+| mysql_generador.py | 213 | 5 | 78 | 11 | **95%** |
 | configuracion_y_constantes.py | 67 | 0 | 0 | 0 | **100%** |
 | exceptions.py | 3 | 0 | 0 | 0 | **100%** |
-| test_mysql_generador.py | 144 | 0 | 0 | 0 | **100%** |
-| **Total del Módulo MySQL** | 414 | 5 | 76 | 11 | **98%** |
+| test_mysql_generador.py | 158 | 2 | 0 | 0 | **99%** |
+| **Total del Módulo MySQL** | 441 | 7 | 76 | 11 | **98%** |
 
 ### Pruebas Implementadas
 
@@ -145,6 +151,10 @@ def test_generar_esquema_visualizacion_activada()
 def test_visualizar_salida_tablas()
 def test_visualizar_salida_relaciones_mtm()
 def test_visualizar_salida_relaciones_otm()
+
+# Transformación de esquema GraphQL
+def test_transformar_esquema_graphql()
+def test_transformar_esquema_graphql_error()
 ```
 
 **Casos de Prueba Destacados:**
@@ -157,6 +167,7 @@ def test_visualizar_salida_relaciones_otm()
 - ✅ **Visualización Rica**: Salida formateada con Rich Console
 - ✅ **Manejo de Enums**: Conversión a tipos ENUM MySQL
 - ✅ **Campos Lista**: Conversión automática a JSON
+- ✅ **Transformación de Esquema**: Limpieza de directivas innecesarias para esquemas cliente
 
 ### Fixtures de Prueba
 
@@ -235,25 +246,25 @@ Name                                                    Stmts   Miss Branch BrPa
 source/cli/graphql/__init__.py                              5      0      0      0   100%
 source/cli/graphql/configuracion_y_constantes.py           67      0      0      0   100%
 source/cli/graphql/exceptions.py                            3      0      0      0   100%
-source/cli/graphql/mysql_generador.py                     200      5     76     11    94%
-tests/cli/graphql/test_mysql_generador.py                 144      0      0      0   100%
+source/cli/graphql/mysql_generador.py                     213      5     78     11    95%
+tests/cli/graphql/test_mysql_generador.py                 158      2      0      0    99%
 -----------------------------------------------------------------------------------------
-============================== 13 passed in 1.58s ==============================
+============================== 13 passed in 1.59s ==============================
 ```
 
 **Métricas de Calidad:**
 - ✅ **13 pruebas pasadas** sin fallos
-- ✅ **Cobertura del generador**: 94%
+- ✅ **Cobertura del generador**: 95%
 - ✅ **Cobertura de configuración**: 100%
 - ✅ **Cobertura de excepciones**: 100%
-- ✅ **Cobertura de pruebas**: 100%
+- ✅ **Cobertura de pruebas**: 99%
 
 ### Análisis de Cobertura por Módulo
 
-1. **mysql_generador.py**: 94% - Excelente cobertura con 5 statements no cubiertos ( edge específicos)
+1. **mysql_generador.py**: 95% - Excelente cobertura con 5 statements no cubiertos ( edge específicos)
 2. **configuracion_y_constantes.py**: 100% - Cobertura completa de todas las clases de datos
 3. **exceptions.py**: 100% - Excepciones completamente verificadas
-4. **test_mysql_generador.py**: 100% - Suite de pruebas completamente ejecutada
+4. **test_mysql_generador.py**: 99% - Suite de pruebas completamente ejecutada
 
 ## 🔧 Características del Generador
 
