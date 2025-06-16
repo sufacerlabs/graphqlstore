@@ -20,6 +20,7 @@ classifiers = [
 dependencies = [
     "rich>=14.0.0",
     "mysql-connector-python>=9.3.0",
+    "graphql-core>=3.2.6",
 ]
 
 [project.optional-dependencies]
