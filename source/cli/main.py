@@ -1,6 +1,6 @@
 "Modulo CLI para GraphQLStore"
 
-# from .inicializar.comando_inicializar import ComandoInicializar
+from .inicializar.comando_inicializar import ComandoInicializar
 from .conexion.comando_conexion import ComandoConexion
 from .probar_conexion.comando_probar_conexion import ComandoProbarConexion
 from .core import ConstructorCLI
@@ -18,7 +18,7 @@ class CLI:
         self.args = None
         self.comando_conexion = ComandoConexion()
         self.comando_probar_conexion = ComandoProbarConexion()
-        # self.comando_inicializar = ComandoInicializar()
+        self.comando_inicializar = ComandoInicializar()
 
     def parsear_comando(self):
         """
@@ -26,13 +26,13 @@ class CLI:
             la interfaz de línea de comandos."""
         self.constructor.agregar_comando(self.comando_conexion)
         self.constructor.agregar_comando(self.comando_probar_conexion)
-        # self.constructor.agregar_comando(self.comando_inicializar)
+        self.constructor.agregar_comando(self.comando_inicializar)
 
     def lanzamiento_condicionado(self):
         """Metodo que lanza el comando solicitado"""
         self.comando_conexion.contenido_comando(self.args)
         self.comando_probar_conexion.contenido_comando(self.args)
-        # self.comando_inicializar.contenido_comando(self.args)
+        self.comando_inicializar.contenido_comando(self.args)
 
     def ejecutar(self):
         """Metodo para ejecutar la interfaz de line de comandos"""
