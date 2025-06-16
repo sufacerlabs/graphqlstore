@@ -1,9 +1,9 @@
 """Modulo GraphQLSchemaParser"""
 
 from typing import Any, Dict
-from graphql.language import parse
-from graphql.error import GraphQLError
-from graphql.language.ast import (
+from graphql import (
+    parse,
+    GraphQLError,
     EnumTypeDefinitionNode,
     ListTypeNode,
     NamedTypeNode,
