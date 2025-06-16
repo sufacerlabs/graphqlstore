@@ -1,16 +1,11 @@
 """Modulo GeneradorEsquemaMySQL"""
 
 from typing import Dict, List, Optional
-from graphql import (
-    IDLE,
-    REMOVE,
-    DirectiveNode,
-    GraphQLError,
-    Visitor,
-    parse,
-    print_ast,
-    visit,
-)
+from graphql.language import parse
+from graphql.error import GraphQLError
+from graphql.language.ast import DirectiveNode
+from graphql.language.printer import print_ast
+from graphql.language.visitor import Visitor, visit, IDLE, REMOVE
 from rich.console import Console
 from rich.tree import Tree
 from rich.syntax import Syntax
