@@ -63,6 +63,19 @@ def fixture_mock_args_params_probar_conexion():
     return args
 
 
+@pytest.fixture(name="mock_params_inicializar")
+def fixture_mock_args_params_inicializar():
+    """Fixture para proporcionar argumentos simulados \
+    con parámetros específicos para inicializar."""
+    args = MagicMock()
+    args.comando = "inicializar"
+    args.esquema = "./home/user/schema.graphql"
+    args.salida = "generated"
+    args.no_visualizar_salida = False
+    args.no_visualizar_sql = False
+    return args
+
+
 def test_inicializar(inst_cli):
     """Prueba de la inicialización correcta del objeto CLI"""
     assert inst_cli.titulo == "GraphQLStore CLI"
@@ -190,3 +203,27 @@ def test_ejecutar_comando_probar_conexion_con_args(
 
     assert inst_cli.args.comando == "probar_conexion"
     assert inst_cli.args.verbose is True
+
+
+def test_ejecutar_inicializar_con_args(inst_cli, mock_params_inicializar):
+    """Prueba de ejecución del comando inicializar con argumentos"""
+
+    # Mockear el método agregar_comando del constructor
+    with patch.object(
+        inst_cli.constructor,
+        "parsear",
+        return_value=mock_params_inicializar,
+    ):
+        with patch.object(
+            inst_cli.comando_inicializar,
+            "contenido_comando",
+        ) as mock_contenido:
+
+            inst_cli.ejecutar()
+
+            mock_contenido.assert_called_once_with(
+                mock_params_inicializar,
+            )
+
+    assert inst_cli.args.comando == "inicializar"
+    assert inst_cli.args.esquema == "./home/user/schema.graphql"
