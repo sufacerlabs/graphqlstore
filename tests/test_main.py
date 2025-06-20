@@ -29,7 +29,7 @@ class TestMain:
         """Prueba que la función main ejecuta CLI correctamente."""
 
         with patch("sys.argv", ["main.py"]):
-            with patch("cli.main.CLI") as mock_cli_clase:
+            with patch("source.cli.main.CLI") as mock_cli_clase:
                 # mocker instancia de cli
                 mock_cli_instancia = MagicMock()
                 mock_cli_clase.return_value = mock_cli_instancia
@@ -56,7 +56,7 @@ class TestMain:
 
         with patch("sys.argv", ["main.py", "conexion"]):
             with redirect_stdout(capturar_salida):
-                with patch("cli.main.CLI") as mock_cli_clase:
+                with patch("source.cli.main.CLI") as mock_cli_clase:
                     # mockear instancia de cli
                     mock_cli_instancia = MagicMock()
 
@@ -95,7 +95,7 @@ class TestMain:
 
         with patch("sys.argv", ["main.py", "inicializar"]):
             with redirect_stdout(capturar_salida):
-                with patch("cli.main.CLI") as mock_cli_clase:
+                with patch("source.cli.main.CLI") as mock_cli_clase:
                     # mockear instancia de cli
                     mock_cli_instancia = MagicMock()
 
@@ -134,7 +134,7 @@ class TestMain:
 
         with patch("sys.argv", ["main.py", "migracion"]):
             with redirect_stdout(capturar_salida):
-                with patch("cli.main.CLI") as mock_cli_clase:
+                with patch("source.cli.main.CLI") as mock_cli_clase:
                     # mockear instancia de cli
                     mock_cli_instancia = MagicMock()
 
@@ -167,7 +167,7 @@ class TestMain:
 
     def test_main_como_script(self):
         """Prueba que la funcion main se ejecuta como script."""
-        with patch("cli.main.CLI") as mock_cli_clase:
+        with patch("source.cli.main.CLI") as mock_cli_clase:
             # mockear instancia  de cli
             mock_cli_instancia = MagicMock()
             mock_cli_clase.return_value = mock_cli_instancia
