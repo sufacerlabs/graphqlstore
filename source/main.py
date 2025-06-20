@@ -1,11 +1,6 @@
 """Modulo CLI princial de punto de entrada."""
 
-try:
-    # para produccio (pypi)
-    from source.cli.main import CLI
-except ImportError:
-    # para desarrollo (local)
-    from cli.main import CLI  # type: ignore[no-redef]
+from cli.main import CLI
 
 
 def main():
