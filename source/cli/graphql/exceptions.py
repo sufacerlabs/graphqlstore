@@ -11,3 +11,15 @@ class SchemaError(GraphQLStoreError):
 
 class RelationshipError(GraphQLStoreError):
     """Error en la configuracion o validacion de relaciones."""
+
+
+class MigrationError(GraphQLStoreError):
+    """Excepción para errores de migración."""
+
+
+class SchemaComparisonError(MigrationError):
+    """Excepción para errores en comparación de esquemas."""
+
+
+class MigrationGenerationError(MigrationError):
+    """Excepción para errores en generación de SQL de migración."""
