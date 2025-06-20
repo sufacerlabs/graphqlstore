@@ -253,6 +253,7 @@ def fixture_relacion_many_to_many():
 @pytest.fixture(name="relacion_one_to_one")
 def fixture_relacion_one_to_one():
     """Fixture para una relación one-to-one."""
+    # pylint: disable=duplicate-code
     return {
         "User": InfoTabla(
             nombre="User",
@@ -322,6 +323,7 @@ def fixture_relacion_one_to_one():
             },
         ),
     }
+    # pylint: enable=duplicate-code
 
 
 @pytest.fixture(name="relacion_sin_nombre")
@@ -399,6 +401,7 @@ def fixture_relacion_sin_nombre():
 @pytest.fixture(name="relacion_con_link_erroneo_many_to_many")
 def fixture_relacion_con_link_erroneo_many_to_many():
     """Fixture para una relación many-to-many con link erroneo."""
+    # pylint: disable=duplicate-code
     return {
         "User": InfoTabla(
             nombre="User",
@@ -459,6 +462,7 @@ def fixture_relacion_con_link_erroneo_many_to_many():
             },
         ),
     }
+    # pylint: enable=duplicate-code
 
 
 @pytest.fixture(name="proceso_simple")
