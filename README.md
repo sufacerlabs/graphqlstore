@@ -382,7 +382,8 @@ graphqlstore/
 
 | Versión | Estado | Características |
 |---------|--------|----------------|
-| **v1.0.0** | 🎯 **Actual** | Core completo + Migraciones |
+| **v0.x.0** | ✅ | Despligue funcionamiento correcto |
+| **v1.0.0** | 🎯 **Actual** | Core completo |
 | **v2.0.0** |  | Directivas avanzadas |
 | **v3.0.0** |  | Soporte GraphQL Server |
 ---
