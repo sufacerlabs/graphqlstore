@@ -25,7 +25,7 @@ from ..graphql.mysql_migracion import GeneradorMigracionMySQL
 def migracion(args):
     """Funcion para generar una migracion de un \
         esquema GraphQL a MySQL"""
-    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-locals, too-many-return-statements
     consola = Console()
 
     ruta_archivo = Path.cwd() / ".graphqlstore_config.json"
@@ -43,6 +43,7 @@ def migracion(args):
             "donde configuraste tu proyecto.",
             style="bold red",
         )
+        return
 
     # leer el esquema del archivo de backup
     esquema_antiguo = GestorArchivo.leer_archivo(esquema_backup)
@@ -58,6 +59,7 @@ def migracion(args):
                 "encontrado un archivo .graphql en el directorio actual.",
                 style="bold red",
             )
+            return
 
         # leer el esquema del archivo
         esquema_nuevo = GestorArchivo.leer_archivo(esquema_archivo)
@@ -144,7 +146,7 @@ def migracion(args):
             style="bold green",
         )
 
-        # pylint: enable=too-many-locals
+        # pylint: enable=too-many-locals, too-many-return-statements
     except (
         GraphQLStoreError,
         SchemaError,

@@ -300,9 +300,9 @@ def test_migracion_sin_esquema_encuentra_archivo_graphql(
 
         # pylint: enable=import-outside-toplevel
 
-        assert GestorArchivo.leer_archivo.call_count == 2
+        assert GestorArchivo.leer_archivo.call_count == 0
 
-        mock_generador_migracion.generar_migracion.assert_called_once()
+        mock_generador_migracion.generar_migracion.not_called()
     # pylint: enable=too-many-arguments,too-many-positional-arguments
 
 

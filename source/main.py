@@ -1,6 +1,9 @@
 """Modulo CLI princial de punto de entrada."""
 
-from source.cli.main import CLI
+try:
+    from source.cli.main import CLI
+except ImportError:
+    from cli.main import CLI  # type: ignore
 
 
 def main():
