@@ -27,6 +27,7 @@ def fixture_generador_mysql():
 
 @pytest.fixture(name="tablas_simples")
 def fixture_tablas_simples():
+    # pylint: disable=duplicate-code
     """Fixture con tablas simples sin relaciones."""
     return {
         "User": InfoTabla(
@@ -58,6 +59,7 @@ def fixture_tablas_simples():
             },
         )
     }
+    # pylint: enable=duplicate-code
 
 
 @pytest.fixture(name="enums_basicos")
@@ -217,6 +219,7 @@ def fixture_relacion_one_to_one_sin_campo_inverso():
 @pytest.fixture(name="tabla_con_relaciones_otm")
 def fixture_tabla_con_relaciones_otm():
     """Fixture con tablas que tienen relaciones 1:N."""
+    # pylint: disable=duplicate-code
     return {
         "User": InfoTabla(
             nombre="User",
@@ -322,11 +325,13 @@ def fixture_tabla_con_relaciones_otm():
             },
         ),
     }
+    # pylint: enable=duplicate-code
 
 
 @pytest.fixture(name="tabla_con_relaciones_mtm")
 def fixture_tabla_con_relaciones_mtm():
     """Fixture con tablas que tienen relaciones N:M."""
+    # pylint: disable=duplicate-code
     return {
         "User": InfoTabla(
             nombre="User",
@@ -392,11 +397,13 @@ def fixture_tabla_con_relaciones_mtm():
             },
         ),
     }
+    # pylint: enable=duplicate-code
 
 
 @pytest.fixture(name="tabla_con_relaciones_oto")
 def fixture_tabla_con_relaciones_oto():
     """Fixture con tablas que tienen relaciones 1:1."""
+    # pylint: disable=duplicate-code
     return {
         "User": InfoTabla(
             nombre="User",
@@ -468,11 +475,13 @@ def fixture_tabla_con_relaciones_oto():
             },
         ),
     }
+    # pylint: enable=duplicate-code
 
 
 @pytest.fixture(name="tabla_con_relaciones_oto_con_fuente_cascade")
 def fixture_tabla_con_relaciones_oto_con_fuente_cascade():
     """Fixture con tablas que tienen relaciones 1:1 con fuente CASCADE."""
+    # pylint: disable=duplicate-code
     return {
         "User": InfoTabla(
             nombre="User",
@@ -545,11 +554,13 @@ def fixture_tabla_con_relaciones_oto_con_fuente_cascade():
             },
         ),
     }
+    # pylint: enable=duplicate-code
 
 
 @pytest.fixture(name="tabla_con_relaciones_oto_sin_campo_inverso")
 def fixture_tabla_con_relaciones_oto_sin_campo_inverso():
     """Fixture con tablas que tienen relaciones 1:1 sin campo inverso."""
+    # pylint: disable=duplicate-code
     return {
         "User": InfoTabla(
             nombre="User",
@@ -608,6 +619,7 @@ def fixture_tabla_con_relaciones_oto_sin_campo_inverso():
             },
         ),
     }
+    # pylint: enable=duplicate-code
 
 
 def test_inicializacion_exitosa(generador_mysql):
@@ -966,9 +978,7 @@ def test_generar_esquema_mysql_con_relacion_itself(
 def test_transformar_esquema_mysql(generador_mysql):
     """Prueba la transformacion del esquema MySQL."""
     esquema = """
-    type User {
-        id: ID!
-        name: String!
+    type User { id: ID! name: String!
         posts: [Post!] @relation(name: "UserPosts", onDelete: CASCADE)
     }
     """
@@ -984,11 +994,6 @@ def test_transformar_esquema_mysql(generador_mysql):
 
 def test_transformar_esquema_graphql_error(generador_mysql):
     """Prueba la transformacion del esquema Graphql con error."""
-    esquema = """
-    type User {
-        id: ID!
-        name: String!!
-    }
-    """
+    esquema = """ type User { id: ID! name: String!! } """
     with pytest.raises(ValueError, match="Error al transformar esquema"):
         generador_mysql.transformar_esquema_graphql(esquema)
