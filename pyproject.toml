@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "graphqlstore"
-version = "0.5.0"
+version = "0.6.0"
 description = "A CLI tool for managing GraphQL stores"
 authors = [
     { name  = "adg1023", email = "adg1023@alu.ubu.es" }
@@ -40,5 +40,5 @@ graphqlstore = "source.main:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["source"]
+include = ["source*"]
 exclude = ["tests**, .github", "Pipfile*"]
