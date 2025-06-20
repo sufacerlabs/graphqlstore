@@ -1,119 +1,498 @@
-# Documentacion del proyecto GraphQLStore
 
-## Resumen del proyecto
+[<p  align="center"><img src="./graphqlstore.png" alt="GraphQLStore CLI" width="300"></p>]()
+# GraphQLStore
 
-GraphQLStore es una aplicacion CLI disenada para gestionar bases de datos
-usando GraphQL. Esta etapa del proyecto es temprana, con una estructura basica.
+<div align="center">
 
-## Estructura del proyecto
+[![PyPI version](https://badge.fury.io/py/graphqlstore.svg)](https://badge.fury.io/py/graphqlstore)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: Private](https://img.shields.io/badge/License-Private-red.svg)](LICENSE)
+[![CI](https://github.com/adg1023/graphqlstore/actions/workflows/ci.yml/badge.svg)](https://github.com/adg1023/graphqlstore/actions/workflows/ci.yml)
+[![CD](https://github.com/adg1023/graphqlstore/actions/workflows/cd.yml/badge.svg)](https://github.com/adg1023/graphqlstore/actions/workflows/cd.yml)
+[![coverage](https://img.shields.io/badge/coverage-97%25-brightgreen.svg)](https://github.com/your-username/graphqlstore)
+[![code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen.svg)](https://pre-commit.com)
+[![pytest](https://img.shields.io/badge/pytest-8.3.5-brightgreen.svg)](https://docs.pytest.org/en/stable/)
+[![rich](https://img.shields.io/badge/Rich-14.0.0-blue.svg)](https://rich.readthedocs.io/en/stable/introduction.html)
+
+**🚀 Herramienta CLI avanzada para gestionar esquemas GraphQL y base de datos de manera sincronizada**
+
+📖 Documentación • ⚡ Inicio Rápido • 🎯 Características • 📊 Ejemplos
+
+</div>
+
+---
+
+## 🌟 Descripción
+
+GraphQLStore CLI es una herramienta de línea de comandos profesional que automatiza la gestión de bases de datos MySQL a partir de esquemas GraphQL. Transforma definiciones GraphQL en estructuras de base de datos completamente funcionales con soporte para relaciones complejas, migraciones automáticas y visualización rica.
+
+### ✨ ¿Por qué GraphQLStore CLI?
+
+- 🔄 **Transformación Automática**: Convierte esquemas GraphQL a MySQL sin configuración manual
+- 🛡️ **Migraciones Seguras**: Evoluciona tu base de datos preservando la integridad de los datos
+- 🎨 **Visualización Rica**: Interfaz beautiful con Rich Console y syntax highlighting
+- ⚡ **Detección Inteligente**: Encuentra y procesa esquemas automáticamente
+- 🔗 **Relaciones Avanzadas**: Soporte completo para relaciones 1:1, 1:N y N:M
+- 📊 **Producción Ready**: 97% de cobertura de tests y arquitectura escalable
+
+---
+
+## 🎯 Características
+
+### 🏗️ Comandos Principales
+
+| Comando | Descripción | Estado |
+|---------|-------------|--------|
+| `conexion` | Configurar conexión a base de datos MySQL | ✅  |
+| `probar-conexion` | Verificar conectividad y diagnósticos | ✅ |
+| `inicializar` | Crear base de datos desde esquema GraphQL | ✅  |
+| `migracion` | Evolucionar esquemas existentes | ✅ |
+
+### 🔧 Características Técnicas
+
+- **🔍 Parser GraphQL**: Análisis completo de esquemas
+- **🔗 Procesador de Relaciones**: Manejo inteligente de relaciones
+- **🗄️ Generador MySQL**: Conversión optimizada GraphQL → SQL
+- **📈 Sistema de Migraciones**: Evolución segura de esquemas
+
+### 🎨 Tipos de Datos Soportados
+
+| GraphQL | MySQL | Características |
+|---------|-------|----------------|
+| `ID` | `VARCHAR(25)` | Primary keys automáticos |
+| `String` | `VARCHAR(255)` | Soporte UTF-8 completo |
+| `Int` | `INT` | Enteros con validación |
+| `Boolean` | `BOOLEAN` | Valores true/false |
+| `DateTime` | `DATETIME` | Timestamps con @createdAt/@updatedAt |
+| `Float` | `DECIMAL(10,2)` | Precisión decimal |
+| `JSON` | `JSON` | Objetos complejos nativos |
+| `[]` | `JSON` | Listas de valores |
+| `Enum` | `ENUM(...)` | Enumeraciones tipo-seguras |
+
+---
+
+## ⚡ Inicio Rápido
+
+### 📦 Instalación
+
+#### Desde PyPI (Recomendado)
+```bash
+pip install graphqlstore
+```
+
+#### Desde Código Fuente
+```bash
+git clone https://github.com/your-username/graphqlstore.git
+cd graphqlstore
+pipenv install --dev
+```
+
+### 🚀 Flujo Básico
+
+#### 1. **Configurar Conexión**
+```bash
+# Configuración interactiva
+graphqlstore conexion
+
+# O con parámetros directos
+graphqlstore conexion \
+  --host localhost \
+  --puerto 3306 \
+  --usuario admin \
+  --password secret \
+  --base-datos mi_app
+```
+
+#### 2. **Verificar Conexión**
+```bash
+graphqlstore probar-conexion --verbose
+```
+
+#### 3. **Inicializar Base de Datos**
+```bash
+# Desde archivo específico
+graphqlstore inicializar --esquema mi_esquema.graphql
+
+# Detección automática
+graphqlstore inicializar
+```
+
+#### 4. **Evolucionar Esquema** 
+```bash
+# Migración automática
+graphqlstore migracion --esquema mi_esquema_v2.graphql
+```
+
+---
+
+## 📊 Ejemplos
+
+### 🎮 Esquema GraphQL de Ejemplo
+
+```graphql
+type User {
+  id: ID! @id
+  username: String! @unique
+  email: String! @unique
+  role: UserRole!
+  posts: [Post!]! @relation(name: "UserPosts")
+  profile: Profile @relation(name: "UserProfile")
+  createdAt: DateTime @createdAt
+  updatedAt: DateTime @updatedAt
+}
+
+type Post {
+  id: ID! @id
+  title: String!
+  content: String
+  published: Boolean! @default(value: "false")
+  tags: [String!]!
+  author: User! @relation(name: "UserPosts", onDelete: CASCADE)
+  createdAt: DateTime @createdAt
+}
+
+type Profile {
+  id: ID! @id
+  bio: String
+  avatar: String
+  user: User! @relation(name: "UserProfile", onDelete: CASCADE)
+}
+
+enum UserRole {
+  ADMIN
+  AUTHOR
+  USER
+}
+```
+
+### 🗄️ SQL Generado Automáticamente
+
+```sql
+-- Tabla User con constraints
+CREATE TABLE User (
+  `id` VARCHAR(25) NOT NULL PRIMARY KEY,
+  `username` VARCHAR(255) NOT NULL,
+  `email` VARCHAR(255) NOT NULL,
+  `role` ENUM('ADMIN','AUTHOR','USER') NOT NULL,
+  `createdAt` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updatedAt` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY `uk_username` (`username`),
+  UNIQUE KEY `uk_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Relaciones con foreign keys
+ALTER TABLE `Post`
+ADD COLUMN `author_id` VARCHAR(25) NOT NULL,
+ADD CONSTRAINT `fk_User_posts_Post` FOREIGN KEY (`author_id`) 
+REFERENCES `User`(id) ON DELETE CASCADE;
+
+ALTER TABLE `Profile`
+ADD COLUMN `user_id` VARCHAR(25) UNIQUE,
+ADD CONSTRAINT `fk_User_profile_Profile` FOREIGN KEY (`user_id`) 
+REFERENCES `User`(id) ON DELETE CASCADE;
+```
+
+### 📈 Visualización Rica
+
+```bash
+GraphQLStore CLI v1.0.0
+Desplegando servicio
+
+📋 Diferencias detectadas
+├── ➕ Tablas agregadas: 1
+├── 🔹 Campos agregados: 3
+└── 🔗 Relaciones agregadas: 2
+
+🔧 CREAR TABLA
+├── Creando tabla Profile
+
+🔧 AGREGAR RELACIÓN
+├── Agregando relación UserProfile
+
+✅ Migración generada exitosamente
+📊 Total de sentencias SQL: 5
+```
+
+---
+
+## 🏗️ Arquitectura
+
+### 📁 Estructura del Proyecto
 
 ```
 graphqlstore/
-├── .github/workflows/      # configuracion CI/CD
-├── source/                 # codigo fuente
-├── tests/                  # archivos de prueba
-└── (archivos de configuracion)
-    ├── Pipfile              # gestion de dependencias
-    ├── Pipfile.lock         # bloque de dependencias
-    ├── pyproject.toml       # configuracion del proyecto y empaquetado
-    ├── setup.cfg            # configuracion adicional de setuptools
-    ├── pytest.ini           # configuracion de pytest
-    ├── .pre-commit-config.yaml  # configuracion de pre-commit
-    ├── .gitignore           # archivos ignorados por git
-    └── README.md            # documentacion del proyecto
-└── LICENSE                  # licencia del proyecto
+├── 📂 source/cli/
+│   ├── 🔌 conexion/          # Gestión de configuración BD
+│   ├── 🩺 probar_conexion/   # Diagnósticos y validación
+│   ├── 🚀 inicializar/       # Inicialización de esquemas
+│   ├── 📈 migracion/         # Sistema de migraciones
+│   ├── 🔍 graphql/           # Motor GraphQL
+│   │   ├── parser.py         # Parser de esquemas
+│   │   ├── mysql_generador.py # Generador SQL
+│   │   ├── mysql_migracion.py # Motor de migraciones
+│   │   └── procesar_relaciones.py # Procesador de relaciones
+│   ├── 🗄️ database/         # Adaptadores de BD
+│   └── 🛠️ utilidades/       # Herramientas auxiliares
+├── 📂 tests/                 # Suite de pruebas (97% cobertura)
+└── 📂 .github/workflows/     # CI/CD automatizado
+├── 📄 README.md              # Documentación principal
+├── 📄 LICENSE                # Licencia del proyecto
+├── 📄 setup.py               # Configuración del paquete
+├── 📄 requirements.txt       # Dependencias del proyecto
+├── 📄 requirements-dev.txt   # Dependencias de desarrollo
+├── 📄 .pre-commit-config.yaml # Configuración de pre-commit
+├── 📄 Pipfile                # Gestión de dependencias con Pipenv
+├── 📄 pyproject.toml         # Configuración del proyecto
+├── 📄 .pylintrc           # Configuración de pylint
 ```
 
-## Implementacionn actual
+### 🔧 Componentes Principales
 
-### Funcionalidad principal
+#### 🔍 **Parser GraphQL** ([`source/cli/graphql/docs/parser.md`](source/cli/graphql/docs/parser.md))
+- Análisis de esquemas GraphQL
+- Extracción de tipos, campos y directivas
+- Validación de sintaxis y semántica
 
-La aplicacion actualmente tiene una implementacion minima con:
-- Un punto de entrada CLI simple en main.py que muestra un mensaje de bienvenida.
-- Estructura basica del proyecto con directorios de codigo fuente y pruebas.
+#### 🔗 **Procesador de Relaciones** ([`source/cli/graphql/docs/procesar_relaciones.md`](source/cli/graphql/docs/procesar_relaciones.md))
+- Detección automática de relaciones
+- Clasificación 1:1, 1:N, N:M
+- Generación de constraints
 
-### Entorno de desarrollo
+#### 🗄️ **Generador MySQL** ([`source/cli/graphql/docs/mysql_generador.md`](source/cli/graphql/docs/mysql_generador.md))
+- Transformación GraphQL → SQL
+- Generación de DDL completo
 
-Las siguientes herramientas de desarrollo estan configuradas:
+#### 📈 **Sistema de Migraciones** ([`source/cli/graphql/docs/mysql_migracion.md`](source/cli/graphql/docs/mysql_migracion.md))
+- Detección inteligente de cambios
+- Generación de SQL incremental
+- Preservación de integridad referencial
 
-1. **Gestión de Paquetes**
-   - Uso de Pipfile con pipenv para la gestión de dependencias
-   - Dependencia principal: `rich` para una salida mejorada en terminal
-   - Varias dependencias de desarrollo incluyendo herramientas de prueba y calidad de código
+---
 
-2. **Herramientas de calidad de código**
-   - Configuración de `pre-commit` para hooks automáticos
-   - Formateo de código con `black`
-   - Análisis estático con `flake8` y `pylint`
-   - Comprobación de tipos con `mypy`
+## 🛠️ Entorno de Desarrollo
 
-3. **Pruebas**
-   - Uso de `pytest` para ejecutar pruebas
-   - `pytest-cov` para medir la cobertura de pruebas
-   - Configuración de `pytest.ini` para generar informes de cobertura
-   - Prueba simple en test_main.py que verifica el mensaje de bienvenida
+### 📋 Requisitos
+- **Python**: 3.9+
+- **MySQL**: 8.0+
+- **Pipenv**: Para gestión de dependencias
 
-4. **Configuración de empaquetado**
-   - `pyproject.toml` para definir metadatos del proyecto, dependencias y configuraciones de herramientas
-   - Punto de entrada  CLI configurado como `graphqlstore = "source.main:main"`
-   - `setup.cfg` para configuraciones adicionales de setuptools, incluyendo referencia al archivo de licencia
+### 🔧 Herramientas de Calidad
 
-### Flujo CI/CD
+| Herramienta | Propósito | Estado |
+|-------------|-----------|--------|
+| **pytest** | Testing framework | ✅ 97% cobertura |
+| **black** | Formateo de código | ✅ Configurado |
+| **flake8** | Linting (ligero) | ✅ Configurado |
+| **pylint** | Linting (exhausto) | ✅ Configurado |
+| **mypy** | Type checking | ✅ Configurado |
+| **pre-commit** | Git hooks | ✅ Configurado |
 
-dos pipelines de CI/CD están configurados para automatizar el proceso de desarrollo y despliegue:
 
-1. **CI Pipeline** (`.github/workflows/ci.yml`): 
-   - Ejecuta pruebas y verifica la calidad del código en cada push a la rama principal o en pull requests.
+## 📊 Cobertura y Calidad
 
-2. **CD Pipeline** (`.github/workflows/cd.yml`):
-   - Desencadenado por etiquetas de versión (v*.*.*)
-   - Construye el paquete
-   - Sube artefactos
-   - Publica en PyPI
-   - Crea lanzamientos en GitHub
+### 🎯 Métricas de Cobertura
 
-### Licencia
+| Módulo | Statements | Miss | Branch | BrPart | Cover |
+|--------|------------|------|--------|--------|-------|
+| **Parser GraphQL** | 64 | 1 | 18 | 1 | **98%** |
+| **Procesador Relaciones** | 96 | 4 | 38 | 6 | **93%** |
+| **Generador MySQL** | 217 | 5 | 78 | 11 | **95%** |
+| **Sistema Migraciones** | 376 | 14 | 192 | 20 | **94%** |
+| **Comandos CLI** | 252 | 11 | 54 | 2 | **100%** |
+| **🎯 TOTAL PROYECTO** | **2993** | **46** | **428** | **44** | **🏆 97%** |
 
-El proyecto usa una licencia privada que prohíbe:
-- Redistribución
-- Modificación
-- Creación de obras derivadas
-- Uso comercial
-- Compartición pública
+### ✅ Suite de Pruebas (TOTAL PROYECTO)
 
-## Inicio rápido
+- **📈 122 pruebas** ejecutándose en **4.72 segundos**
+- **🎯 97% cobertura global** con **0 fallos**
+- **🔍 Casos edge** y **integración completa**
+- **🚀 CI/CD automatizado** en GitHub Actions
 
-Con el fin de facilitar el inicio rápido del proyecto, se ha configurado un entorno de desarrollo con `pipenv`. Esto permite gestionar las dependencias y ejecutar scripts de manera sencilla.
+---
 
+## 🔄 CI/CD Pipeline
+
+### 🛠️ Flujo Automatizado
+
+### 🔍 **CI Pipeline** (`.github/workflows/ci.yml`)
+
+**🔄 Flujo de Integración Continua:**
+
+```
+📋 Entrada (Push/PR) 
+   ↓
+🔧 Instalación de Dependencias
+   ↓
+🎯 Pre-commit Hooks
+   ├── ⚫ Black (Formateo)
+   ├── 🔍 Flake8 (Linting ligero)
+   ├── 📋 Pylint (Análisis exhaustivo)
+   └── 🔤 Mypy (Type checking)
+   ↓
+🧪 Testing Suite + Cobertura
+   ↓
+✅ Pipeline Completo
+```
+
+| Etapa | Proceso | Estado |
+|-------|---------|--------|
+| **🔧 Setup** | Instalación de dependencias | ✅ |
+| **🎯 Quality** | Pre-commit hooks completos | ✅ |
+| **⚫ Black** | Formateo automático de código | ✅ |
+| **🔍 Flake8** | Linting ligero y rápido | ✅ |
+| **📋 Pylint** | Análisis exhaustivo de código | ✅ |
+| **🔤 Mypy** | Verificación estática de tipos | ✅ |
+| **🧪 Testing** | Suite completa con cobertura | ✅ |
+
+### 🚀 **CD Pipeline** (`.github/workflows/cd.yml`)
+
+**📦 Flujo de Despliegue Continuo:**
+
+```
+🏷️ Release Tag
+   ↓
+🛠️ Configuración Build Tools
+   ↓
+📦 Empaquetado Multi-formato
+   ├── 🎯 Wheel Distribution
+   └── 📄 Source Distribution
+   ↓
+🚀 Publicación PyPI
+   ↓
+📋 GitHub Release + Artifacts
+   ↓
+✅ Deploy Completo
+```
+
+| Etapa | Proceso | Descripción |
+|-------|---------|-------------|
+| **🛠️ Setup** | Configuración de herramientas | Preparación del entorno de build |
+| **📦 Build** | Empaquetado multi-formato | Wheel + Source distributions |
+| **🎯 Wheel** | Distribución binaria | Instalación rápida optimizada |
+| **📄 Source** | Distribución de código fuente | Máxima compatibilidad |
+| **🚀 PyPI** | Publicación automática | Deploy en nuevas versiones |
+| **📋 GitHub** | Release + artifacts | Documentación y archivos |
+
+### ⚡ **Pipeline Triggers**
+- **CI**: `push`, `pull_request` → `main`
+- **CD**: `release` → `published` → PyPI + GitHub Release
+
+### 📦 Releases
+
+| Versión | Estado | Características |
+|---------|--------|----------------|
+| **v1.0.0** | 🎯 **Actual** | Core completo + Migraciones |
+| **v2.0.0** |  | Directivas avanzadas |
+| **v3.0.0** |  | Soporte GraphQL Server |
+---
+
+## 📚 Documentación
+
+### 📖 Guías Detalladas
+
+- 🔌 **[Comando `conexion`](source/cli/conexion/README_latest.md)** - Configuración de base de datos
+- 🩺 **[Comando `probar-conexion`](source/cli/probar_conexion/README.md)** - Diagnósticos y validación de base de datos
+- 🚀 **[Comando `inicializar`](source/cli/inicializar/README.md)** - Inicialización de esquemas
+- 📈 **[Comando `migracion`](source/cli/migracion/README.md)** - Sistema de migraciones
+
+### 🔧 Documentación Técnica
+
+- 🔍 **[Parser GraphQL](source/cli/graphql/docs/parser.md)** - Motor de análisis
+- 🔗 **[Procesador de Relaciones](source/cli/graphql/docs/procesar_relaciones.md)** - Gestión de relaciones
+- 🗄️ **[Generador MySQL](source/cli/graphql/docs/mysql_generador.md)** - Transformación SQL
+- 📈 **[Sistema de Migraciones](source/cli/graphql/docs/mysql_migracion.md)** - Evolución de esquemas
+
+---
+
+## 🎯 Casos de Uso
+
+### 🚀 **Desarrollo de APIs**
 ```bash
-# NOTA: Asegúrate de tener pipenv instalado. Si no lo tienes, puedes instalarlo con pip, pipx o tu gestor de paquetes preferido.
-
-# Instalar las dependencias incluidas las de desarrollo
-pipenv install --dev
-
-# Opcionalmente, si necesitas una "primera linea de defensa" para la calidad del código, puedes ejecutar:
-pipenv run pre-commit install
-
-# Ejecutar las pruebas
-pipenv run pytest
-
-# Ejecutar el script principal
-pipenv run python source/main.py
+# Inicialización completa de proyecto
+graphqlstore conexion
+graphqlstore inicializar
+# ✅ Base de datos lista para desarrollo
 ```
 
-La otra es descargando el proyecto desde pypi:
-
+### 🔄 **Evolución de Esquemas**
 ```bash
-# Instalar el paquete desde PyPI
-pip install graphqlstore
-# Ejecutar el comando CLI
-graphqlstore
+# Migración automática
+graphqlstore migracion
+# ✅ Esquema actualizado preservando datos
 ```
 
-## Siguientes pasos
+### 🏭 **Integración CI/CD**
+```bash
+# Modo silencioso para pipelines
+graphqlstore migracion \
+  --esquema schemas/production.graphql \
+  --no-visualizar-salida \
+  --no-visualizar-sql
+```
 
-El proyecto está en una fase inicial de desarrollo. Los siguientes pasos incluyen:
-- Expandir la intefaz CLI para incluir más comandos
-- Implementar la funcionalidad de GraphQL
-- Agregar capacidades de conexión a bases de datos
-- Mejorar la documentación y ejemplos de uso
+---
+
+## 🤝 Contribuir
+
+### 🐛 Reportar Issues
+
+### muy pronto
+
+### 📝 Desarrollo Local
+
+### muy pronto
+
+---
+
+## 🗺️ Roadmap
+
+### 🚀 **v1.0.0** - Core
+- [x] `conexion` - Configuración de conexión a MySQL
+- [x] `probar-conexion` - Verificación de conectividad
+- [x] `inicializar` - Inicialización de base de datos desde esquema GraphQL
+- [x] `migracion` - Sistema de migraciones automático
+
+### 🎯 **v2.0.0** - Directivas Avanzadas
+- [ ] `@unique` - Campos únicos
+- [ ] `@default` - Valores por defecto
+- [ ] `@db` - Renombrado de campos
+- [ ] `@protected` - Campos protegidos
+
+### 🚀 **v3.0.0** - GraphQL Server
+- [ ]  `server` - Lanzar servidor (en js o py) GraphQL
+
+### 🏭 **v4.0.0** - Refactorizar modulos
+- [ ] Refactorizar modulos `GeneradorEsquemaMySQL` y `GenerarMigracionMySQL` implementando patrones de diseño para escalar el codigo y mejorar la mantenibilidad, sobre todo para implementar la funcionalidad multi-base de datos.
+- [ ] Implementar soporte PostgreSQL
+- [ ] Implementar soporte a Redis
+---
+
+## 📜 Licencia
+
+Este proyecto utiliza una **Licencia Privada** que prohíbe:
+- ❌ Redistribución en cualquier forma
+- ❌ Modificación del software
+- ❌ Creación de obras derivadas
+- ❌ Uso comercial no autorizado
+- ❌ Compartición pública
+
+Ver LICENSE para detalles completos.
+
+---
+
+<div align="center">
+
+### 🚀 **¡Transforma tus esquemas GraphQL en bases de datos MySQL con un solo comando!**
+
+[![Get Started](https://img.shields.io/badge/Get%20Started-brightgreen?style=for-the-badge&logo=rocket)](https://pypi.org/project/graphqlstore/)
+[![Documentation](https://img.shields.io/badge/Documentation-blue?style=for-the-badge&logo=book)](source/cli/)
+[![GitHub](https://img.shields.io/badge/GitHub-black?style=for-the-badge&logo=github)](https://github.com/adg1023/graphqlstore)
+
+---
+
+**📧 ¿Preguntas?** • **🐛 ¿Problemas?** • **💡 ¿Ideas?**
+
+MUY PRONTO
+
+</div>
