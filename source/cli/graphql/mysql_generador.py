@@ -1,15 +1,17 @@
 """Modulo GeneradorEsquemaMySQL"""
 
 from typing import Dict, List, Optional
-from graphql.language import parse
 from graphql.error import GraphQLError
-from graphql.language.ast import DirectiveNode
+from graphql.language import parse
+from graphql.language.ast import DirectiveNode, FieldDefinitionNode
 from graphql.language.printer import print_ast
-from graphql.language.visitor import Visitor, visit, IDLE, REMOVE
+from graphql.language.visitor import IDLE, REMOVE, Visitor, visit
 from rich.console import Console
-from rich.tree import Tree
-from rich.syntax import Syntax
 from rich.panel import Panel
+from rich.syntax import Syntax
+from rich.tree import Tree
+
+from .templates import TEMPLATE_AGREGAR_UNIQUE
 
 from .configuracion_y_constantes import (
     InfoEnum,
@@ -353,6 +355,7 @@ class GeneradorEsquemaMySQL:
         """Generar la sentencia SQL para crear una tabla."""
 
         columnas = []
+        indices = []
         has_primary_key = False
 
         tabla_sql = f"CREATE TABLE {nombre_tabla} (\n"
@@ -366,6 +369,9 @@ class GeneradorEsquemaMySQL:
                 continue
 
             nombre_columna = nombre_campo
+
+            if "db" in directivas and "rename" in directivas["db"].argumentos:
+                nombre_columna = directivas["db"].argumentos["rename"]
 
             # definir el tipo de dato sql
             tipo_sql = ParserGraphQLEsquema.get_type_mapping().get(
@@ -393,6 +399,20 @@ class GeneradorEsquemaMySQL:
                 def_columna += " PRIMARY KEY"
                 has_primary_key = True
 
+            dft = "default" in directivas
+
+            if dft and "value" in directivas["default"].argumentos:
+                if tipo_sql in ("TEXT", "VARCHAR(255)") or (
+                    tipo_sql.startswith("ENUM")
+                ):
+                    def_columna += " DEFAULT '"
+                    valor_default = directivas["default"].argumentos["value"]
+                    def_columna += f"{valor_default}'"
+                else:
+                    def_columna += (
+                        f" DEFAULT {directivas['default'].argumentos['value']}"
+                    )
+
             if "createdAt" in directivas:
                 def_columna += " DEFAULT CURRENT_TIMESTAMP"
 
@@ -402,10 +422,19 @@ class GeneradorEsquemaMySQL:
 
             columnas.append(def_columna)
 
+            if "unique" in directivas:
+                sql = TEMPLATE_AGREGAR_UNIQUE.format(
+                    uk_nom_columna=nombre_columna,
+                    nom_columna=nombre_columna,
+                )
+                indices.append(sql)
+
         if not has_primary_key:
             columnas.insert(0, "  `id` VARCHAR(25) NOT NULL PRIMARY KEY")
 
         tabla_sql += ",\n".join(columnas)
+        if indices:
+            tabla_sql += ",\n" + ",\n".join(indices)
         tabla_sql += "\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;"
 
         self.esquema_mysql.append(tabla_sql)
@@ -514,12 +543,19 @@ class GeneradorEsquemaMySQL:
             ast = parse(schema)
 
             class RemoveDirectivesVisitor(Visitor):
-                """Remover directiva visitor del  ast."""
+                """Remover directiva visitor del ast y campos protegidos."""
 
                 def enter(self, node, *_):
                     """Entrar nodo en el traversal"""
                     if isinstance(node, DirectiveNode):
                         return REMOVE
+
+                    # remover campo
+                    if isinstance(node, FieldDefinitionNode):
+                        for directive in node.directives:
+                            if directive.name.value == "protected":
+                                return REMOVE
+
                     return IDLE
 
             new_ast = visit(ast, RemoveDirectivesVisitor())
