@@ -196,7 +196,7 @@ REFERENCES `User`(id) ON DELETE CASCADE;
 ### 📈 Visualización Rica
 
 ```bash
-GraphQLStore CLI v1.0.0
+GraphQLStore CLI v2.0.0
 Desplegando servicio
 
 📋 Diferencias detectadas
@@ -273,7 +273,7 @@ graphqlstore/
 ## 🛠️ Entorno de Desarrollo
 
 ### 📋 Requisitos
-- **Python**: 3.9+
+- **Python**: 3.10+
 - **MySQL**: 8.0+
 - **Pipenv**: Para gestión de dependencias
 
@@ -295,16 +295,16 @@ graphqlstore/
 
 | Módulo | Statements | Miss | Branch | BrPart | Cover |
 |--------|------------|------|--------|--------|-------|
-| **Parser GraphQL** | 64 | 1 | 18 | 1 | **98%** |
+| **Parser GraphQL** | 67 | 1 | 18 | 1 | **98%** |
 | **Procesador Relaciones** | 96 | 4 | 38 | 6 | **93%** |
-| **Generador MySQL** | 217 | 5 | 78 | 11 | **95%** |
-| **Sistema Migraciones** | 376 | 14 | 192 | 20 | **94%** |
+| **Generador MySQL** | 237 | 5 | 94 | 11 | **95%** |
+| **Sistema Migraciones** | 396 | 17 | 208 | 23 | **93%** |
 | **Comandos CLI** | 252 | 11 | 54 | 2 | **100%** |
-| **🎯 TOTAL PROYECTO** | **2993** | **46** | **428** | **44** | **🏆 97%** |
+| **🎯 TOTAL PROYECTO** | **3058** | **53** | **464** | **49** | **🏆 97%** |
 
 ### ✅ Suite de Pruebas (TOTAL PROYECTO)
 
-- **📈 122 pruebas** ejecutándose en **4.72 segundos**
+- **📈 123 pruebas** ejecutándose en **4.14 segundos**
 - **🎯 97% cobertura global** con **0 fallos**
 - **🔍 Casos edge** y **integración completa**
 - **🚀 CI/CD automatizado** en GitHub Actions
@@ -383,8 +383,8 @@ graphqlstore/
 | Versión | Estado | Características |
 |---------|--------|----------------|
 | **v0.x.0** | ✅ | Despligue funcionamiento correcto |
-| **v1.0.0** | 🎯 **Actual** | Core completo |
-| **v2.0.0** |  | Directivas avanzadas |
+| **v1.0.0** | ✅ | Core completo |
+| **v2.0.0** | 🎯 **Actual** | Directivas avanzadas |
 | **v3.0.0** |  | Soporte GraphQL Server |
 ---
 
@@ -455,19 +455,20 @@ graphqlstore migracion \
 - [x] `migracion` - Sistema de migraciones automático
 
 ### 🎯 **v2.0.0** - Directivas Avanzadas
-- [ ] `@unique` - Campos únicos
-- [ ] `@default` - Valores por defecto
-- [ ] `@db` - Renombrado de campos
-- [ ] `@protected` - Campos protegidos
+- [x] `@unique` - Campos únicos
+- [x] `@default` - Valores por defecto
+- [x] `@db` - Renombrado de campos
+- [x] `@protected` - Campos protegidos
 
 ### 🚀 **v3.0.0** - GraphQL Server
 - [ ]  `server` - Lanzar servidor (en js o py) GraphQL
 
-### 🏭 **v4.0.0** - Refactorizar modulos
+### 🏭 **v4.0.0** - Multi-Database
 - [ ] Refactorizar modulos `GeneradorEsquemaMySQL` y `GenerarMigracionMySQL` implementando patrones de diseño para escalar el codigo y mejorar la mantenibilidad, sobre todo para implementar la funcionalidad multi-base de datos.
 - [ ] Implementar soporte PostgreSQL
 - [ ] Implementar soporte a Redis
 ---
+
 
 ## 📜 Licencia
 
