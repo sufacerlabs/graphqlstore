@@ -12,7 +12,7 @@ El generador MySQL proporciona capacidades completas de conversión GraphQL → 
 
 1. **Generación de Tablas**: Conversión automática de tipos GraphQL a tablas MySQL
 2. **Manejo de Relaciones**: Soporte completo para relaciones 1:1, 1:N y N:M
-3. **Directivas Avanzadas**: Procesamiento de `@id`, `@relation`, `@createdAt`, `@updatedAt`
+3. **Directivas Avanzadas**: Procesamiento de `@id`, `@relation`, `@createdAt`, `@updatedAt`, `@unique`, `@default`, `@db`, `@protected`
 4. **Tipos de Datos**: Mapeo inteligente de tipos GraphQL a tipos MySQL
 5. **Visualización Rica**: Salida formateada con Rich para mejor experiencia de usuario
 6. **Configuración Flexible**: Control granular de visualización y generación
@@ -108,6 +108,10 @@ TIPO_MAPPING = {
 @createdAt   → TIMESTAMP ACTUAL
 @updatedAt   → ACTUALIZACION TIMESTAMP
 @relation    → TRATAMIENTO DE RELACIONES
+@unique      → CAMPO UNICO
+@default     → VALOR POR DEFECTO
+@db          → RENOMBRAR CAMPO EN DB
+@protected   → PROTECCIÓN DE CAMPO
 ```
 
 ## 🧪 Suite de Pruebas
@@ -116,11 +120,11 @@ TIPO_MAPPING = {
 
 | Módulo | Statements | Miss | Branch | BrPart | Cover |
 |--------|------------|------|--------|--------|-------|
-| mysql_generador.py | 213 | 5 | 78 | 11 | **95%** |
-| configuracion_y_constantes.py | 67 | 0 | 0 | 0 | **100%** |
-| exceptions.py | 3 | 0 | 0 | 0 | **100%** |
-| test_mysql_generador.py | 158 | 2 | 0 | 0 | **99%** |
-| **Total del Módulo MySQL** | 441 | 7 | 76 | 11 | **98%** |
+| mysql_generador.py | 232 | 5 | 94 | 11 | **95%** |
+| configuracion_y_constantes.py | 132 | 0 | 0 | 0 | **100%** |
+| exceptions.py | 6 | 0 | 0 | 0 | **100%** |
+| test_mysql_generador.py | 164 | 2 | 0 | 0 | **99%** |
+| **Total del Módulo MySQL** | 534 | 7 | 94 | 11 | **98%** |
 
 ### Pruebas Implementadas
 
@@ -146,8 +150,10 @@ def test_generar_esquema_oto_sin_campo_inverso()
 # Auto-relaciones (self-references)
 def test_generar_esquema_mysql_con_relacion_itself()
 
+# Manejo de directivas avanzadas
+def test_generar_esquema_mysql_con_directivas_avanzadas()
+
 # Visualización
-def test_generar_esquema_visualizacion_activada()
 def test_visualizar_salida_tablas()
 def test_visualizar_salida_relaciones_mtm()
 def test_visualizar_salida_relaciones_otm()
@@ -163,7 +169,7 @@ def test_transformar_esquema_graphql_error()
 - ✅ **Relaciones N:M**: Crea tablas junction con primary keys compuestas
 - ✅ **Relaciones 1:1**: Lógica CASCADE para determinar ubicación de foreign key
 - ✅ **Auto-relaciones**: Manejo de relaciones self-reference con campos _A y _B
-- ✅ **Directivas Avanzadas**: Procesamiento de todas las directivas GraphQL
+- ✅ **Directivas Avanzadas**: Procesamiento completo de todas las directivas GraphQL
 - ✅ **Visualización Rica**: Salida formateada con Rich Console
 - ✅ **Manejo de Enums**: Conversión a tipos ENUM MySQL
 - ✅ **Campos Lista**: Conversión automática a JSON
@@ -243,17 +249,17 @@ def fixture_relacion_one_to_many():
 
 Name                                                    Stmts   Miss Branch BrPart  Cover
 -----------------------------------------------------------------------------------------
-source/cli/graphql/__init__.py                              5      0      0      0   100%
-source/cli/graphql/configuracion_y_constantes.py           67      0      0      0   100%
-source/cli/graphql/exceptions.py                            3      0      0      0   100%
-source/cli/graphql/mysql_generador.py                     213      5     78     11    95%
-tests/cli/graphql/test_mysql_generador.py                 158      2      0      0    99%
+source/cli/graphql/__init__.py                              6      0      0      0   100%
+source/cli/graphql/configuracion_y_constantes.py           132     0      0      0   100%
+source/cli/graphql/exceptions.py                            6      0      0      0   100%
+source/cli/graphql/mysql_generador.py                     232      5     94     11    95%
+tests/cli/graphql/test_mysql_generador.py                 164      2      0      0    99%
 -----------------------------------------------------------------------------------------
-============================== 13 passed in 1.59s ==============================
+============================== 15 passed in 2.45s ==============================
 ```
 
 **Métricas de Calidad:**
-- ✅ **13 pruebas pasadas** sin fallos
+- ✅ **15 pruebas pasadas** sin fallos
 - ✅ **Cobertura del generador**: 95%
 - ✅ **Cobertura de configuración**: 100%
 - ✅ **Cobertura de excepciones**: 100%
@@ -417,8 +423,8 @@ El generador incluye salida formateada para mejor experiencia de usuario:
 # GraphQL Schema
 type User {
     id: ID! @id
-    username: String!
-    email: String!
+    username: String! @default(value: "guest")
+    email: String! @unique
     role: UserRole!
     posts: [Post!]! @relation(name: "UserPosts")
     profile: Profile @relation(name: "UserProfile")
@@ -430,7 +436,7 @@ type Post {
     id: ID! @id
     title: String!
     content: String
-    status: PostStatus!
+    status: PostStatus! @default(value: "DRAFT")
     tags: [String!]!
     author: User! @relation(name: "UserPosts", onDelete: "CASCADE")
     createdAt: DateTime @createdAt
@@ -459,8 +465,8 @@ enum PostStatus {
 # SQL Generado Automáticamente:
 CREATE TABLE User (
   `id` VARCHAR(25) NOT NULL PRIMARY KEY,
-  `username` VARCHAR(255) NOT NULL,
-  `email` VARCHAR(255) NOT NULL,
+  `username` VARCHAR(255) NOT NULL DEFAULT 'guest',
+  `email` VARCHAR(255) NOT NULL UNIQUE,
   `role` ENUM('ADMIN','AUTHOR','USER') NOT NULL,
   `createdAt` DATETIME DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -528,6 +534,7 @@ type Review {
 # - Table junction CategoryCategories para auto-relación N:M
 # - Foreign keys para relaciones 1:N
 # - Constraints ON DELETE CASCADE/SET NULL según configuración
+# - Definiciones en base a las directivas avanzadas
 ```
 
 ## 🔧 Manejo Avanzado de Casos Especiales
@@ -621,8 +628,7 @@ def _generar_relacion(...):
 
 ### Mejoras Identificadas
 
-1. **Directivas avanzadas**: Implementacion de directivas `@unique`(campos unicos), `@default`(valor por defecto en la base de datos),  `@db`(renombrar un campo en la base de datos), `@index`(indices de optimizacion).
-2. **Patrones de diseño**: Implementación de patrones de diseño como Builder y Factory para mejorar la extensibilidad.
+1. **Patrones de diseño**: Implementación de patrones de diseño como Builder y Factory para mejorar la extensibilidad.
 
 ### Generador en Producción
 

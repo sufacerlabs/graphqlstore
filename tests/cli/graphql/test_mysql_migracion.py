@@ -951,7 +951,7 @@ def test_generar_sql_migracion_error_metodo_privado(generador_migracion):
         assert "Error generando SQL: Error crear tabla" in str(exc_info.value)
 
 
-def test_generar_migracion_genera_columna_id_no_definido(
+def test_generar_migracion_con_directivas_avanzadas(
     generador_migracion,
     esquema_anterior,
     esquema_nuevo,
@@ -968,11 +968,15 @@ def test_generar_migracion_genera_columna_id_no_definido(
 
     esquema_nuevo = """
     type Employee {
-        name: String!
-        email: String
+        name: String! @default(value: "emp_123")
+        age: Int @default(value: 18)
+        email: String @unique
+        status: EmployeeStatus @default(value: ACTIVE)
         createdAt: DateTime @createdAt
         updatedAt: DateTime @updatedAt
     }
+
+    enum EmployeeStatus { ACTIVE INACTIVE }
     """
 
     with patch.object(generador_migracion.consola, "print"):
@@ -989,3 +993,7 @@ def test_generar_migracion_genera_columna_id_no_definido(
 
     sql_generado = resultado.sql_generado
     assert "`id` VARCHAR(25) NOT NULL PRIMARY KEY" in sql_generado
+    assert "`email` VARCHAR(255) UNIQUE" in sql_generado
+    assert "`name` VARCHAR(255) NOT NULL DEFAULT 'emp_123'" in sql_generado
+    assert "`age` INT DEFAULT 18" in sql_generado
+    assert "ENUM('ACTIVE', 'INACTIVE') DEFAULT 'ACTIVE'" in sql_generado

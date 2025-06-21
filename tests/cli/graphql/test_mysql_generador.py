@@ -25,36 +25,76 @@ def fixture_generador_mysql():
     return GeneradorEsquemaMySQL()
 
 
+@pytest.fixture(name="campo_id")
+def fixture_campo_id():
+    """Fixture que proporciona un campo ID."""
+    return InfoField(
+        nombre="id",
+        tipo_campo="ID",
+        es_lista=False,
+        es_requerido=True,
+        directivas={
+            "id": InfoDirectiva(nombre="id", argumentos={}),
+        },
+    )
+
+
 @pytest.fixture(name="tablas_simples")
-def fixture_tablas_simples():
+def fixture_tablas_simples(campo_id):
     # pylint: disable=duplicate-code
     """Fixture con tablas simples sin relaciones."""
     return {
         "User": InfoTabla(
             nombre="User",
             campos={
-                "id": InfoField(
-                    nombre="id",
-                    tipo_campo="ID",
-                    es_lista=False,
-                    es_requerido=True,
-                    directivas={
-                        "id": InfoDirectiva(nombre="id", argumentos={}),
-                    },
-                ),
+                "id": campo_id,
                 "name": InfoField(
                     nombre="name",
                     tipo_campo="String",
                     es_lista=False,
                     es_requerido=True,
-                    directivas={},
+                    directivas={
+                        "default": InfoDirectiva(
+                            nombre="default",
+                            argumentos={"value": "Anonymous"},
+                        ),
+                    },
                 ),
-                "hashtags": InfoField(
-                    nombre="hashtags",
+                "hash_tags": InfoField(
+                    nombre="has_tags",
                     tipo_campo="Json",
                     es_lista=True,
                     es_requerido=True,
-                    directivas={},
+                    directivas={
+                        "db": InfoDirectiva(
+                            nombre="db",
+                            argumentos={"rename": "hashtags"},
+                        ),
+                    },
+                ),
+                "email": InfoField(
+                    nombre="email",
+                    tipo_campo="String",
+                    es_lista=False,
+                    es_requerido=True,
+                    directivas={
+                        "unique": InfoDirectiva(
+                            nombre="unique",
+                            argumentos={},
+                        ),
+                    },
+                ),
+                "age": InfoField(
+                    nombre="age",
+                    tipo_campo="Int",
+                    es_lista=False,
+                    es_requerido=False,
+                    directivas={
+                        "default": InfoDirectiva(
+                            nombre="default",
+                            argumentos={"value": 18},
+                        ),
+                    },
                 ),
             },
         )
@@ -217,22 +257,14 @@ def fixture_relacion_one_to_one_sin_campo_inverso():
 
 
 @pytest.fixture(name="tabla_con_relaciones_otm")
-def fixture_tabla_con_relaciones_otm():
+def fixture_tabla_con_relaciones_otm(campo_id):
     """Fixture con tablas que tienen relaciones 1:N."""
     # pylint: disable=duplicate-code
     return {
         "User": InfoTabla(
             nombre="User",
             campos={
-                "id": InfoField(
-                    nombre="id",
-                    tipo_campo="ID",
-                    es_lista=False,
-                    es_requerido=True,
-                    directivas={
-                        "id": InfoDirectiva(nombre="id", argumentos={}),
-                    },
-                ),
+                "id": campo_id,
                 "name": InfoField(
                     nombre="name",
                     tipo_campo="String",
@@ -291,15 +323,7 @@ def fixture_tabla_con_relaciones_otm():
         "Post": InfoTabla(
             nombre="Post",
             campos={
-                "id": InfoField(
-                    nombre="id",
-                    tipo_campo="ID",
-                    es_lista=False,
-                    es_requerido=True,
-                    directivas={
-                        "id": InfoDirectiva(nombre="id", argumentos={}),
-                    },
-                ),
+                "id": campo_id,
                 "title": InfoField(
                     nombre="title",
                     tipo_campo="String",
@@ -329,22 +353,14 @@ def fixture_tabla_con_relaciones_otm():
 
 
 @pytest.fixture(name="tabla_con_relaciones_mtm")
-def fixture_tabla_con_relaciones_mtm():
+def fixture_tabla_con_relaciones_mtm(campo_id):
     """Fixture con tablas que tienen relaciones N:M."""
     # pylint: disable=duplicate-code
     return {
         "User": InfoTabla(
             nombre="User",
             campos={
-                "id": InfoField(
-                    nombre="id",
-                    tipo_campo="ID",
-                    es_lista=False,
-                    es_requerido=True,
-                    directivas={
-                        "id": InfoDirectiva(nombre="id", argumentos={}),
-                    },
-                ),
+                "id": campo_id,
                 "roles": InfoField(
                     nombre="roles",
                     tipo_campo="Role",
@@ -365,13 +381,7 @@ def fixture_tabla_con_relaciones_mtm():
         "Role": InfoTabla(
             nombre="Role",
             campos={
-                "id": InfoField(
-                    nombre="id",
-                    tipo_campo="ID",
-                    es_lista=False,
-                    es_requerido=True,
-                    directivas={},
-                ),
+                "id": campo_id,
                 "name": InfoField(
                     nombre="name",
                     tipo_campo="String",
@@ -401,22 +411,14 @@ def fixture_tabla_con_relaciones_mtm():
 
 
 @pytest.fixture(name="tabla_con_relaciones_oto")
-def fixture_tabla_con_relaciones_oto():
+def fixture_tabla_con_relaciones_oto(campo_id):
     """Fixture con tablas que tienen relaciones 1:1."""
     # pylint: disable=duplicate-code
     return {
         "User": InfoTabla(
             nombre="User",
             campos={
-                "id": InfoField(
-                    nombre="id",
-                    tipo_campo="ID",
-                    es_lista=False,
-                    es_requerido=True,
-                    directivas={
-                        "id": InfoDirectiva(nombre="id", argumentos={}),
-                    },
-                ),
+                "id": campo_id,
                 "name": InfoField(
                     nombre="name",
                     tipo_campo="String",
@@ -450,13 +452,7 @@ def fixture_tabla_con_relaciones_oto():
         "Profile": InfoTabla(
             nombre="Profile",
             campos={
-                "id": InfoField(
-                    nombre="id",
-                    tipo_campo="ID",
-                    es_lista=False,
-                    es_requerido=True,
-                    directivas={},
-                ),
+                "id": campo_id,
                 "user": InfoField(
                     nombre="user",
                     tipo_campo="User",
@@ -479,22 +475,14 @@ def fixture_tabla_con_relaciones_oto():
 
 
 @pytest.fixture(name="tabla_con_relaciones_oto_con_fuente_cascade")
-def fixture_tabla_con_relaciones_oto_con_fuente_cascade():
+def fixture_tabla_con_relaciones_oto_con_fuente_cascade(campo_id):
     """Fixture con tablas que tienen relaciones 1:1 con fuente CASCADE."""
     # pylint: disable=duplicate-code
     return {
         "User": InfoTabla(
             nombre="User",
             campos={
-                "id": InfoField(
-                    nombre="id",
-                    tipo_campo="ID",
-                    es_lista=False,
-                    es_requerido=True,
-                    directivas={
-                        "id": InfoDirectiva(nombre="id", argumentos={}),
-                    },
-                ),
+                "id": campo_id,
                 "name": InfoField(
                     nombre="name",
                     tipo_campo="String",
@@ -522,13 +510,7 @@ def fixture_tabla_con_relaciones_oto_con_fuente_cascade():
         "Profile": InfoTabla(
             nombre="Profile",
             campos={
-                "id": InfoField(
-                    nombre="id",
-                    tipo_campo="ID",
-                    es_lista=False,
-                    es_requerido=True,
-                    directivas={},
-                ),
+                "id": campo_id,
                 "bio": InfoField(
                     nombre="bio",
                     tipo_campo="String",
@@ -558,22 +540,14 @@ def fixture_tabla_con_relaciones_oto_con_fuente_cascade():
 
 
 @pytest.fixture(name="tabla_con_relaciones_oto_sin_campo_inverso")
-def fixture_tabla_con_relaciones_oto_sin_campo_inverso():
+def fixture_tabla_con_relaciones_oto_sin_campo_inverso(campo_id):
     """Fixture con tablas que tienen relaciones 1:1 sin campo inverso."""
     # pylint: disable=duplicate-code
     return {
         "User": InfoTabla(
             nombre="User",
             campos={
-                "id": InfoField(
-                    nombre="id",
-                    tipo_campo="ID",
-                    es_lista=False,
-                    es_requerido=True,
-                    directivas={
-                        "id": InfoDirectiva(nombre="id", argumentos={}),
-                    },
-                ),
+                "id": campo_id,
                 "profile": InfoField(
                     nombre="profile",
                     tipo_campo="Profile",
@@ -801,11 +775,11 @@ def test_generar_esquema_oto_sin_campo_inverso(
     ) in sql
 
 
-def test_generar_esquema_visualizacion_activada(
+def test_generar_esquema_con_directivas_avanzadas(
     generador_mysql,
     tablas_simples,
 ):
-    """Prueba la generacion del esquema con visualizacion activada."""
+    """Prueba la generacion del esquema con directivas avanzadas."""
     with patch.object(generador_mysql.consola, "print") as mock_print:
         sql = generador_mysql.generar_esquema(
             tablas=tablas_simples,
@@ -816,8 +790,10 @@ def test_generar_esquema_visualizacion_activada(
         )
 
     assert "CREATE TABLE User" in sql
-    assert "`name` VARCHAR(255) NOT NULL" in sql
+    assert "`name` VARCHAR(255) NOT NULL DEFAULT 'Anonymous'" in sql
     assert "`hashtags` JSON NOT NULL" in sql
+    assert "`age` INT DEFAULT 18" in sql
+    assert "UNIQUE KEY `uk_email` (`email`)" in sql
 
     assert mock_print.called
 
@@ -913,19 +889,13 @@ def fixture_relacion_itself():
 
 
 @pytest.fixture(name="tabla_con_relaciones_itself")
-def fixture_tabla_con_relaciones_itself():
+def fixture_tabla_con_relaciones_itself(campo_id):
     """Fixture con tablas que tienen relaciones de tipo itself."""
     return {
         "User": InfoTabla(
             nombre="friends",
             campos={
-                "id": InfoField(
-                    nombre="id",
-                    tipo_campo="ID",
-                    es_lista=False,
-                    es_requerido=True,
-                    directivas={},
-                ),
+                "id": campo_id,
                 "name": InfoField(
                     nombre="name",
                     tipo_campo="String",
@@ -978,7 +948,10 @@ def test_generar_esquema_mysql_con_relacion_itself(
 def test_transformar_esquema_mysql(generador_mysql):
     """Prueba la transformacion del esquema MySQL."""
     esquema = """
-    type User { id: ID! name: String!
+    type User {
+        id: ID!
+        name: String!
+        password: String! @protected
         posts: [Post!] @relation(name: "UserPosts", onDelete: CASCADE)
     }
     """
@@ -988,6 +961,7 @@ def test_transformar_esquema_mysql(generador_mysql):
         assert "type User" in resultado
         assert "posts: [Post!]" in resultado
         assert "@relation" not in resultado
+        assert "password" not in resultado
     except ValueError as e:
         pytest.fail(f"Transformacion fallida: {str(e)}")
 

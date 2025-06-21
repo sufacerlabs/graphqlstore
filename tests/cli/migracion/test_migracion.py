@@ -248,6 +248,43 @@ def test_migracion_con_esquema_especificado_exitoso(
         )
 
 
+def test_migracion_con_esquema_especificado_no_existe(
+    mock_args,
+    esquema_anterior,
+    mock_loader,
+    ruta_proyecto,
+):
+    """Prueba migración con esquema especificado que no existe."""
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
+    with (
+        patch(
+            "source.cli.migracion.main.Path.cwd",
+            return_value=ruta_proyecto,
+        ),
+        patch(
+            "source.cli.migracion.main.Path.exists",
+            side_effect=[True, False],
+        ),
+        patch(
+            "source.cli.migracion.main.GestorArchivo.leer_archivo",
+            return_value=esquema_anterior,
+        ),
+        patch(
+            "source.cli.migracion.main.ConfiguracionJsonLoader",
+            return_value=mock_loader,
+        ),
+        patch("source.cli.migracion.main.Console") as mock_console,
+    ):
+        migracion(mock_args)
+
+        mock_consola_instancia = mock_console.return_value
+        llamadas = mock_consola_instancia.print.call_args_list
+        for call in llamadas:
+            if "no se ha encontrado el esquema" in str(call).lower():
+                break
+    # pylint: enable=too-many-arguments,too-many-positional-arguments
+
+
 def test_migracion_sin_esquema_encuentra_archivo_graphql(
     mock_args_sin_esquema,
     esquema_anterior,
@@ -268,6 +305,7 @@ def test_migracion_sin_esquema_encuentra_archivo_graphql(
             "source.cli.migracion.main.Path.cwd",
             return_value=ruta_proyecto,
         ),
+        patch("source.cli.migracion.main.Path.exists", return_value=True),
         patch.object(Path, "glob", return_value=iter([mock_esquema_archivo])),
         patch(
             "source.cli.migracion.main.GestorArchivo.leer_archivo",
@@ -300,9 +338,11 @@ def test_migracion_sin_esquema_encuentra_archivo_graphql(
 
         # pylint: enable=import-outside-toplevel
 
-        assert GestorArchivo.leer_archivo.call_count == 0
+        assert GestorArchivo.leer_archivo.call_count == 2
 
-        mock_generador_migracion.generar_migracion.not_called()
+        GestorArchivo.leer_archivo.assert_called()
+
+        mock_generador_migracion.generar_migracion.assert_called_once()
     # pylint: enable=too-many-arguments,too-many-positional-arguments
 
 

@@ -81,3 +81,7 @@ def template_modificar_fk(
         FOREIGN KEY (`{campo_fk}_id`)
         REFERENCES `{tabla_ref}`(id){on_delete};"""
     # pylint: enable=too-many-arguments, too-many-positional-arguments
+
+
+# INDEXES
+TEMPLATE_AGREGAR_UNIQUE = "UNIQUE KEY `uk_{uk_nom_columna}` (`{nom_columna}`)"

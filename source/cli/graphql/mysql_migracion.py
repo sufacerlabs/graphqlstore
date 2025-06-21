@@ -631,14 +631,34 @@ class GeneradorMigracionMySQL:
     def _generar_definicion_columna(self, campo: InfoField) -> str:
         """Generar definicion completa de columna."""
         tipo_sql = self._obtener_tipo_sql(campo)
-        definicion = f"`{campo.nombre}` {tipo_sql}"
+
+        nombre_columna = campo.nombre
+
+        db = "db" in campo.directivas
+        if db and "rename" in campo.directivas["db"].argumentos:
+            nombre_columna = campo.directivas["db"].argumentos["rename"]
+
+        definicion = f"`{nombre_columna}` {tipo_sql}"
 
         # Agregar constrains
         if campo.es_requerido:
             definicion += " NOT NULL"
 
+        if "unique" in campo.directivas:
+            definicion += " UNIQUE"
+
         if "id" in campo.directivas:
             definicion += " PRIMARY KEY"
+
+        df = "default" in campo.directivas
+        if df and "value" in campo.directivas["default"].argumentos:
+            valor_default = campo.directivas["default"].argumentos["value"]
+            lst = ("TEXT", "VARCHAR(255)")
+            if tipo_sql in lst or (tipo_sql.startswith("ENUM")):
+                definicion += " DEFAULT '"
+                definicion += f"{valor_default}'"
+            else:
+                definicion += f" DEFAULT {valor_default}"
 
         if "createdAt" in campo.directivas:
             definicion += " DEFAULT CURRENT_TIMESTAMP"
