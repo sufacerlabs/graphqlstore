@@ -971,12 +971,12 @@ def test_generar_migracion_con_directivas_avanzadas(
         name: String! @default(value: "emp_123")
         age: Int @default(value: 18)
         email: String @unique
-        status: EmployeeStatus @default(value: ACTIVE)
+        status: EmployeeStatus @default(value: CONTRACTED)
         createdAt: DateTime @createdAt
         updatedAt: DateTime @updatedAt
     }
 
-    enum EmployeeStatus { ACTIVE INACTIVE }
+    enum EmployeeStatus { ACTIVE INACTIVE FIRED CONTRACTED }
     """
 
     with patch.object(generador_migracion.consola, "print"):
@@ -996,4 +996,4 @@ def test_generar_migracion_con_directivas_avanzadas(
     assert "`email` VARCHAR(255) UNIQUE" in sql_generado
     assert "`name` VARCHAR(255) NOT NULL DEFAULT 'emp_123'" in sql_generado
     assert "`age` INT DEFAULT 18" in sql_generado
-    assert "ENUM('ACTIVE', 'INACTIVE') DEFAULT 'ACTIVE'" in sql_generado
+    assert "TIVE', 'FIRED', 'CONTRACTED') DEFAULT 'CONTRACTED'" in sql_generado
