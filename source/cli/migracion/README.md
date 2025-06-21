@@ -422,7 +422,7 @@ type Profile {
 ### Salida Típica de Migración Exitosa
 
 ```bash
-GraphQLStore CLI v1.0.0
+GraphQLStore CLI v2.0.0
 Desplegando servicio
 
 MIGRANDO ESQUEMA
@@ -503,4 +503,4 @@ El comando `migracion` está listo para uso en producción con:
 
 ---
 
-**📝 Nota**: Esta documentación corresponde a GraphQLStore CLI v1.0.0 y se actualiza continuamente con nuevas características y mejoras. El comando `migracion` complementa perfectamente al comando `inicializar` para proporcionar un flujo completo de desarrollo desde la creación inicial hasta la evolución continua de esquemas GraphQL en bases de datos MySQL.
+**📝 Nota**: Esta documentación corresponde a GraphQLStore CLI v2.0.0 y se actualiza continuamente con nuevas características y mejoras. El comando `migracion` complementa perfectamente al comando `inicializar` para proporcionar un flujo completo de desarrollo desde la creación inicial hasta la evolución continua de esquemas GraphQL en bases de datos MySQL.
