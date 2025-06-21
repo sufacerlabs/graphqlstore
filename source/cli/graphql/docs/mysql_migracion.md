@@ -145,11 +145,11 @@ class InfoDiffEnums:
 
 | Módulo | Statements | Miss | Branch | BrPart | Cover |
 |--------|------------|------|--------|--------|-------|
-| mysql_migracion.py | 376 | 14 | 192 | 20 | **94%** |
+| mysql_migracion.py | 388 | 15 | 200 | 21 | **94%** |
 | configuracion_y_constantes.py | 132 | 0 | 0 | 0 | **100%** |
 | exceptions.py | 6 | 0 | 0 | 0 | **100%** |
-| test_mysql_migracion.py | 262 | 2 | 2 | 0 | **99%** |
-| **Total del Módulo Migración** | 776 | 16 | 194 | 20 | **98%** |
+| test_mysql_migracion.py | 266 | 2 | 2 | 0 | **99%** |
+| **Total del Módulo Migración** | 792 | 17 | 202 | 21 | **98%** |
 
 ### Pruebas Implementadas
 
@@ -218,10 +218,10 @@ def test_generar_sql_migracion_error_metodo_privado()
 
 Name                                                    Stmts   Miss Branch BrPart  Cover
 -----------------------------------------------------------------------------------------
-source/cli/graphql/mysql_migracion.py                     376     14    192     20    94%
+source/cli/graphql/mysql_migracion.py                     388     15    200     21    94%
 source/cli/graphql/configuracion_y_constantes.py          132      0      0      0   100%
 source/cli/graphql/exceptions.py                            6      0      0      0   100%
-tests/cli/graphql/test_mysql_migracion.py                  262      2      2      0    99%
+tests/cli/graphql/test_mysql_migracion.py                 266      2      2      0    99%
 -----------------------------------------------------------------------------------------
 ============================== 22 passed in 1.92s ==============================
 ```
@@ -371,8 +371,8 @@ type Post {
 ```graphql
 type User {
     id: ID! @id
-    name: String!
-    email: String!
+    name: String! @default(value: "customer_123)
+    email: String! @unique
     posts: [Post] @relation(name: "UserPosts")
     profile: Profile @relation(name: "UserProfile")
     createdAt: DateTime @createdAt
@@ -408,8 +408,11 @@ CREATE TABLE Profile (
   `avatar` VARCHAR(255)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Modificar campo name en User
+ALTER TABLE `User` MODIFY COLUMN `name` VARCHAR(255) NOT NULL DEFAULT 'customer_123';
+
 -- Modificar campo email en User
-ALTER TABLE `User` MODIFY COLUMN `email` VARCHAR(255) NOT NULL;
+ALTER TABLE `User` MODIFY COLUMN `email` VARCHAR(255) NOT NULL UNIQUE;
 
 -- Agregar campo posts a User
 ALTER TABLE `User` ADD COLUMN `createdAt` DATETIME DEFAULT CURRENT_TIMESTAMP;
@@ -461,7 +464,7 @@ enum UserStatus {
 type User {
     id: ID! @id
     name: String!
-    status: UserStatus
+    status: UserStatus @default(value: ACTIVE)
 }
 ```
 
@@ -469,7 +472,7 @@ type User {
 
 ```sql
 -- Actualizar enum UserStatus en User
-ALTER TABLE `User` MODIFY COLUMN `status` ENUM('ACTIVE', 'INACTIVE', 'PENDING', 'BANNED');
+ALTER TABLE `User` MODIFY COLUMN `status` ENUM('ACTIVE', 'INACTIVE', 'PENDING', 'BANNED') DEFAULT 'ACTIVE';
 ```
 
 ### Migración con Relaciones Complejas
@@ -753,6 +756,7 @@ id_migracion = f"migration_{timestamp}_{hash_schemas[:8]}"
 - **Generación SQL ordenada** respetando dependencias
 - **Manejo robusto** de relaciones complejas
 - **Soporte completo** para enumeraciones
+- **Soporte de directivas avanzadas** como @default, @unique, @db, @relation, @protected,  @createdAt, @updatedAt, @id
 - **Generación automática** de columnas ID cuando no se especifican
 
 ### Calidad del Código
