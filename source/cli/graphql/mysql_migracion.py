@@ -182,12 +182,14 @@ class GeneradorMigracionMySQL:
                 info_nuevo.tablas,
             )
 
-            # filtrar tablas existentes
-            self._tablas_existentes = {
-                t: i
-                for t, i in info_anterior.tablas.items()
-                if t not in diferencias.tablas.eliminadas
-            }
+            # filtrar tablas existentes y actualizarlas con nueva información
+            self._tablas_existentes = {}
+            for t, i in info_anterior.tablas.items():
+                if t not in diferencias.tablas.eliminadas:
+                    if t in info_nuevo.tablas:
+                        self._tablas_existentes[t] = info_nuevo.tablas[t]
+                    else:
+                        self._tablas_existentes[t] = i
 
             # comparar relaciones
             diferencias.relaciones = self._comparar_relaciones(
@@ -271,7 +273,6 @@ class GeneradorMigracionMySQL:
             for enum_modificado in diferencias.enums.modificados:
                 sql_enum = self._generar_sql_modificar_enum(enum_modificado)
                 sentencias_sql.extend(sql_enum)
-                print(sentencias_sql)
 
             # 7. agregar nuevas relaciones
             for relacion in diferencias.relaciones.agregadas:
@@ -929,6 +930,9 @@ class GeneradorMigracionMySQL:
         for nom_tabla, campos in tablas_con_enum.items():
             for campo in campos:
 
+                if "default" in campo.directivas:
+                    continue
+
                 definicion = self._generar_definicion_columna(
                     campo,
                 )
@@ -957,9 +961,6 @@ class GeneradorMigracionMySQL:
     ) -> Dict[str, List[InfoField]]:
         """Buscar todas las tablas y campos que usan un enum específico."""
         tablas_con_enum = {}
-
-        # necesitamos acceso a las tablas actuales, las obtenemos del parser
-        # asumiendo que tenemos acceso a la información del esquema nuevo
 
         for nombre_tabla, info_tabla in self._tablas_existentes.items():
             campos_con_enum = []
