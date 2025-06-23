@@ -403,7 +403,8 @@ graphqlstore/
 | **v0.x.0** | ✅ | Despligue funcionamiento correcto |
 | **v1.0.0** | ✅ | Core completo |
 | **v2.0.0** | ✅ | Directivas avanzadas |
-| **v3.0.0** | 🎯 **Actual** | Soporte GraphQL Server |
+| **v3.0.0** | ✅ | Soporte servidor GraphQL en JS |
+| **v3.x.0** | 🎯 **Actual** | Bugs, mejoras y documentación |
 ---
 
 ## 📚 Documentación
@@ -481,7 +482,8 @@ graphqlstore migracion \
 ### 🚀 **v3.0.0** - GraphQL Server
 - [x]  `server` - Crea un servidor GraphQL en Javacript de pruebas
 
-### 🏭 **v3.x.0** - Soporte GraphQL Server
+### 🏭 **v3.x.0** - Bugs, mejoras y documentacion
+- [x] Arreglar bugs y maltipados
 - [ ] Mejorar las funcionalidades del core
 - [ ] Mejorar toda documentación
 - [ ] Mejorar la implementación del servidor GraphQL.js
