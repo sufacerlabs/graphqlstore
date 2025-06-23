@@ -181,3 +181,27 @@ class TestMain:
             # verificar que se ejecuto correctamente
             mock_cli_clase.assert_called_once()
             mock_cli_instancia.ejecutar.assert_called_once()
+
+    def test_main_import_fallback_cli(self):
+        """Prueba que el import fallback funciona cuando
+        source.cli.main.CLI no esta disponible."""
+
+        mock_cli_instancia = MagicMock()
+        mock_cli_class = MagicMock(return_value=mock_cli_instancia)
+
+        # Create a mock module with CLI class
+        mock_cli_main = MagicMock()
+        mock_cli_main.CLI = mock_cli_class
+
+        with patch.dict(
+            "sys.modules", {"source.cli.main": None, "cli.main": mock_cli_main}
+        ):
+
+            # pylint: disable=import-outside-toplevel
+            from source.main import main
+
+            # pylint: disable=import-outside-toplevel
+            main()
+
+            mock_cli_class.assert_called_once()
+            mock_cli_instancia.ejecutar.assert_called_once()
