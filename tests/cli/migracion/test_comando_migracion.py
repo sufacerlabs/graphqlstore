@@ -15,7 +15,7 @@ def fixture_comando_migracion():
 def test_crear_comando_agregar_argumentos(comando_migracion):
     """Prueba que crear_comando agrega correctamente \
         los argumentos al subparser."""
-
+    # pylint: disable=duplicate-code
     # mock subparsers
     mock_subparsers = MagicMock()
     # mock parser
@@ -75,6 +75,7 @@ def test_crear_comando_agregar_argumentos(comando_migracion):
         arg_actual, kwargs_actual = llamadas[i]
         assert arg_actual == args
         assert kwargs_actual == kwargs
+    # pylint: enable=duplicate-code
 
 
 @patch("source.cli.migracion.comando_migracion.migracion")

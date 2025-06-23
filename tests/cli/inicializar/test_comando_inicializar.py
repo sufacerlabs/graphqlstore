@@ -15,7 +15,7 @@ def comando_conexion():
 def test_crear_comando_agregar_argumentos(comando_init):
     """Prueba que crear_comando agrega correctamente \
         los argumentos al subparser."""
-
+    # pylint: disable=duplicate-code
     # mock subparsers
     mock_subparsers = MagicMock()
     # mock parser
@@ -73,6 +73,7 @@ def test_crear_comando_agregar_argumentos(comando_init):
         arg_actual, kwargs_actual = llamadas[i]
         assert arg_actual == args
         assert kwargs_actual == kwargs
+    # pylint: enable=duplicate-code
 
 
 @patch("source.cli.inicializar.comando_inicializar.inicializar")
