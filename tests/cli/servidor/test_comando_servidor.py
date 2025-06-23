@@ -26,7 +26,7 @@ def test_crear_comando_agregar_argumentos(comando_servidor):
 
     mock_subparsers.add_parser.assert_called_once_with(
         "servidor",
-        help="Iniciar un servidor GraphQL",
+        help="(opcional) Crear un servidor GraphQL de pruebas en node",
     )
 
 

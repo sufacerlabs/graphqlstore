@@ -10,7 +10,7 @@ class ComandoServidor(Comando):
     """
 
     def crear_comando(self, subparsers):
-        htext = "Iniciar un servidor GraphQL"
+        htext = "(opcional) Crear un servidor GraphQL de pruebas en node"
         subparsers.add_parser(
             "servidor",
             help=htext,

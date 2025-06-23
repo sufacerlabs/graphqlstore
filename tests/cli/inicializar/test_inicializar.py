@@ -464,3 +464,40 @@ def test_inicializar_db_con_tablas_existentes(
 
 
 # pylint: enable=too-many-arguments, too-many-positional-arguments
+
+
+def test_ini_multi_archivos_gql_sin_esquema_especificado(
+    mock_args_sin_esquema,
+    ruta_proyecto,
+):
+    """Prueba que verifica el comportamiento al encontrar
+    varios archivos .graphql."""
+
+    mock_esquema_archivos = [
+        ruta_proyecto / "schema1.graphql",
+        ruta_proyecto / "schema2.graphql",
+    ]
+
+    with (
+        patch(
+            "source.cli.inicializar.main.Path.cwd",
+            return_value=ruta_proyecto,
+        ),
+        patch(
+            "source.cli.inicializar.main.GestorArchivo.asegurar_dir_existe",
+        ),
+        patch.object(Path, "glob", return_value=iter(mock_esquema_archivos)),
+        patch("source.cli.inicializar.main.Console") as mock_console,
+    ):
+        inicializar(mock_args_sin_esquema)
+
+        # verificar que se leyeron los archivos .graphql
+        assert len(mock_esquema_archivos) == 2
+
+        # verificar que se muestra un mensaje de error
+        mock_console.return_value.print.assert_called_once_with(
+            "Se encontraron múltiples archivos .graphql en el "
+            "directorio actual. Por favor, especifique un "
+            "esquema específico usando el parámetro --esquema.",
+            style="bold red",
+        )

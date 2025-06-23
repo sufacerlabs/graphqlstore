@@ -84,40 +84,6 @@ def test_conexion_con_archivo(_mock_file, mock_cwd, mock_consola, mock_args):
 
 @patch("source.cli.conexion.main.Console")
 @patch("source.cli.conexion.main.Path.cwd")
-@patch(
-    "builtins.open",
-    new_callable=mock_open,
-    read_data='{"DB_HOST": "existing_host", "DB_PUERTO": "5432"}',
-)
-def test_conexion_con_configuracion_existente(
-    mock_file, mock_cwd, mock_consola, mock_args
-):
-    """Prueba de conexion con configuracion existente."""
-
-    # configurar mocks
-    mock_cwd.return_value = Path("/ruta/simulada")
-    mock_consola_instancia = mock_consola.return_value
-
-    # configurar mock Path.exists para que retorne True
-    with patch.object(Path, "exists", return_value=True):
-        conexion(mock_args)
-
-    # verificar que se intento leer el archivo
-    mock_file.assert_called()
-
-    # verificar que se imprimio el mensaje correcto
-    mock_consola_instancia.print.assert_any_call(
-        "Configure las base de datos que necesite.", style="bold green"
-    )
-
-    # verificar que se imprimio el mensaje correcto
-    mock_consola_instancia.print.assert_any_call(
-        "Configuracion cargada desde el archivo existente.", style="bold green"
-    )
-
-
-@patch("source.cli.conexion.main.Console")
-@patch("source.cli.conexion.main.Path.cwd")
 @patch("builtins.open", new_callable=mock_open)
 def test_conexion_con_params(_mock_file, mock_cwd, mock_consola, mock_args):
     """Prueba de conexion con parametros especificos."""

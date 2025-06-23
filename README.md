@@ -318,11 +318,11 @@ graphqlstore/
 | **Generador MySQL** | 237 | 5 | 94 | 11 | **95%** |
 | **Sistema Migraciones** | 396 | 17 | 208 | 23 | **93%** |
 | **Comandos CLI** | 252 | 11 | 54 | 2 | **100%** |
-| **🎯 TOTAL PROYECTO** | **3102** | **51** | **46** | **49** | **🏆 97%** |
+| **🎯 TOTAL PROYECTO** | **3098** | **52** | **468** | **49** | **🏆 97%** |
 
 ### ✅ Suite de Pruebas (TOTAL PROYECTO)
 
-- **📈 126 pruebas** ejecutándose en **5.29 segundos**
+- **📈 126 pruebas** ejecutándose en **5.49 segundos**
 - **🎯 97% cobertura global** con **0 fallos**
 - **🔍 Casos edge** y **integración completa**
 - **🚀 CI/CD automatizado** en GitHub Actions
