@@ -769,7 +769,7 @@ class GeneradorMigracionMySQL:
         return [
             "-- Migracion generada automaticamente",
             f"-- Fecha: {timestamp}",
-            "-- GraphQLStore CLI v2.0.0",
+            "-- GraphQLStore CLI v3.0.0",
             "",
         ]
 

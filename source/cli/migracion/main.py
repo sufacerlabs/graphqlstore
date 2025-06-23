@@ -74,7 +74,7 @@ def migracion(args):
 
         esquema_nuevo = GestorArchivo.leer_archivo(Path(args.esquema))
 
-    consola.print("GraphQLStore CLI v2.0.0", style="bold green")
+    consola.print("GraphQLStore CLI v3.0.0", style="bold green")
     consola.print("Desplegando servicio", style="bold green")
 
     consola.print("\nMIGRANDO ESQUEMA...\n", style="bold magenta")

@@ -414,4 +414,4 @@ El comando `inicializar` está listo para uso en producción con:
 
 ---
 
-**📝 Nota**: Esta documentación corresponde a GraphQLStore CLI v2.0.0 y se actualiza continuamente con nuevas características y mejoras.
+**📝 Nota**: Esta documentación corresponde a GraphQLStore CLI v3.0.0 y se actualiza continuamente con nuevas características y mejoras.
