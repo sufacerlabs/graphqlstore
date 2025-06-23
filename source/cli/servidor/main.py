@@ -36,7 +36,7 @@ def servidor():
                 "DB_PUERTO": 3306,
                 "DB_USUARIO": "root",
                 "DB_PASSWORD": "root",
-                "DB_NOMBRE": "graphqlstore",
+                "DB_NOMBRE": "testdb",
             }
 
         # Generar archivos del servidor
@@ -104,7 +104,7 @@ import resolvers from './resolvers.js';
 async function main() {
 
   const externalSchema = await loadSchema(
-    path.join(path.resolve('../generated'), './schema.graphql'),
+    path.join(path.resolve('./generated'), './schema.graphql'),
     {
       loaders: [
         new GraphQLFileLoader()
@@ -113,7 +113,7 @@ async function main() {
   )
 
   const internalSchemas = await loadSchema(
-    './*.graphql',
+    './queries_mutations.graphql',
     {
       loaders: [
         new GraphQLFileLoader()
@@ -217,9 +217,9 @@ main().catch((error) => {
 def _generar_graphql(directorio: Path):
     """Generar archivos GraphQL de ejemplo"""
 
-    contenido_graphql = """# import User from './../generated/schema.graphql'
-# import Post from './../generated/schema.graphql'
-# import PostState from './../generated/schema.graphql'
+    contenido_graphql = """# import User from './generated/schema.graphql'
+# import Post from './generated/schema.graphql'
+# import PostState from './generated/schema.graphql'
 
 \"""
 Un tipo que muestra las consultas sobre el esquema

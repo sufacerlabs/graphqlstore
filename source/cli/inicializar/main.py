@@ -38,7 +38,21 @@ def inicializar(args):
     if not args.esquema:
         # si no se proporciona un esquema, buscar uno por defecto
         # en el directorio actual
-        esquema_archivo = next(Path.cwd().glob("*.graphql"), None)
+        # obtener todos los archivos .graphql en el directorio actual
+        graphql_files = list(Path.cwd().glob("*.graphql"))
+
+        # si hay mas de un archivo .graphql, mostrar un error
+        if len(graphql_files) > 1:
+            consola.print(
+                "Se encontraron múltiples archivos .graphql en el "
+                "directorio actual. Por favor, especifique un "
+                "esquema específico usando el parámetro --esquema.",
+                style="bold red",
+            )
+            return
+
+        # If there's exactly one .graphql file, use it
+        esquema_archivo = graphql_files[0] if graphql_files else None
         if esquema_archivo is None:
             consola.print(
                 "No se ha proporcionado un esquema y tampoco se ha "

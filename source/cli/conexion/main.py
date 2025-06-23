@@ -11,8 +11,6 @@ def conexion(args):
 
     co_si, co_no = "bold green", "bold red"
 
-    consola.print("Configure las base de datos que necesite.", style=co_si)
-
     # cargar configuracion existente, si existe
     configuracion_archivo = Path.cwd() / ".graphqlstore_config.json"
     conf = {}
@@ -22,8 +20,6 @@ def conexion(args):
         try:
             with open(configuracion_archivo, "r", encoding="utf-8") as f:
                 conf = json.load(f)
-            msg = "Configuracion cargada desde el archivo existente."
-            consola.print(msg, style=co_si)
         except (json.JSONDecodeError, OSError) as e:
             msg = f"Error al leer el archivo de configuracion: {str(e)}"
             consola.print(msg, style=co_no)
@@ -40,7 +36,7 @@ def conexion(args):
             consola.print(msg, style=co_no)
             return
 
-    if not configuracion_archivo.exists() and not args.archivo:
+    if not args.archivo:
 
         if args.host:
             conf["DB_HOST"] = args.host
