@@ -189,7 +189,7 @@ class TestMain:
         mock_cli_instancia = MagicMock()
         mock_cli_class = MagicMock(return_value=mock_cli_instancia)
 
-        # Create a mock module with CLI class
+        # mockear modulo cli
         mock_cli_main = MagicMock()
         mock_cli_main.CLI = mock_cli_class
 
