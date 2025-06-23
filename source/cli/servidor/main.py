@@ -25,7 +25,6 @@ def servidor():
             style="yellow",
         )
 
-        # Cargar configuración de BD (opcional, para futuras funcionalidades)
         ruta_archivo = Path.cwd() / ".graphqlstore_config.json"
 
         if ruta_archivo.exists():
@@ -63,7 +62,7 @@ def _generar_package_json(directorio: Path):
         "type": "module",
         "scripts": {
             "start": "node index.js",
-            "dev": "nodemon -e js,json,graphql --w . --ignore ./node_modules",
+            "dev": "nodemon -e js,json,graphql -w . --ignore ./node_modules",
             "test": 'echo "Error: no test specified" && exit 1',
         },
         "keywords": ["graphql", "javascript", "node.js", "graphqlstore"],
@@ -130,7 +129,7 @@ async function main() {
       port: {conf["DB_PUERTO"]},
       user: '{conf["DB_USUARIO"]}',
       password: '{conf["DB_PASSWORD"]}',
-      database: {conf["DB_NOMBRE"]},
+      database: '{conf["DB_NOMBRE"]}',
   }});
 
 """
