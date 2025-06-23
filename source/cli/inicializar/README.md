@@ -265,7 +265,7 @@ ALTER TABLE posts ADD CONSTRAINT fk_posts_user_id
 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 ```
 
-#### 2. `cliente.graphql`
+#### 2. `schema.graphql`
 ```graphql
 # Esquema GraphQL transformado para cliente
 type User {

@@ -126,7 +126,7 @@ def inicializar(args):
         graphql_esquema = generador_esquema_mysql.transformar_esquema_graphql(
             esquema_contenido
         )
-        archivo_salida = Path(salida_dir) / "cliente.graphql"
+        archivo_salida = Path(salida_dir) / "schema.graphql"
         GestorArchivo.escribir_archivo(graphql_esquema, archivo_salida)
     except ValueError as e:
         consola.print(
