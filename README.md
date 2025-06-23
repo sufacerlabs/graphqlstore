@@ -48,6 +48,7 @@ GraphQLStore CLI es una herramienta de línea de comandos profesional que automa
 | `probar-conexion` | Verificar conectividad y diagnósticos | ✅ |
 | `inicializar` | Crear base de datos desde esquema GraphQL | ✅  |
 | `migracion` | Evolucionar esquemas existentes | ✅ |
+| `server` | Crea un servidor GraphQL en js de **pruebas** | ✅ |
 
 ### 🔧 Características Técnicas
 
@@ -69,6 +70,20 @@ GraphQLStore CLI es una herramienta de línea de comandos profesional que automa
 | `JSON` | `JSON` | Objetos complejos nativos |
 | `[]` | `JSON` | Listas de valores |
 | `Enum` | `ENUM(...)` | Enumeraciones tipo-seguras |
+| `!` | `NOT NULL` | Validación de campos obligatorios |
+
+ahora crea una tabla para directivas soportadas
+### 📜 Directivas Soportadas
+| Directiva | Descripción |
+|-----------|-------------|
+| `@id` | Define un campo como clave primaria
+| `@unique` | Asegura que el campo sea único
+| `@default` | Establece un valor por defecto para el campo
+| `@db` | Renombra el campo en la base de datos
+| `@protected` | Oculta el campo en el esquema cliente
+| `@relation` | Define relaciones entre tipos
+| `@createdAt` | Marca el campo con la fecha de creación
+| `@updatedAt` | Marca el campo con la fecha de actualización
 
 ---
 
@@ -131,6 +146,9 @@ graphqlstore migracion --esquema mi_esquema_v2.graphql
 ### 🎮 Esquema GraphQL de Ejemplo
 
 ```graphql
+scalar Json
+scalar DateTime
+
 type User {
   id: ID! @id
   username: String! @unique
@@ -196,7 +214,7 @@ REFERENCES `User`(id) ON DELETE CASCADE;
 ### 📈 Visualización Rica
 
 ```bash
-GraphQLStore CLI v2.0.0
+GraphQLStore CLI v3.0.0
 Desplegando servicio
 
 📋 Diferencias detectadas
@@ -300,11 +318,11 @@ graphqlstore/
 | **Generador MySQL** | 237 | 5 | 94 | 11 | **95%** |
 | **Sistema Migraciones** | 396 | 17 | 208 | 23 | **93%** |
 | **Comandos CLI** | 252 | 11 | 54 | 2 | **100%** |
-| **🎯 TOTAL PROYECTO** | **3058** | **53** | **464** | **49** | **🏆 97%** |
+| **🎯 TOTAL PROYECTO** | **3102** | **51** | **46** | **49** | **🏆 97%** |
 
 ### ✅ Suite de Pruebas (TOTAL PROYECTO)
 
-- **📈 123 pruebas** ejecutándose en **4.14 segundos**
+- **📈 126 pruebas** ejecutándose en **5.29 segundos**
 - **🎯 97% cobertura global** con **0 fallos**
 - **🔍 Casos edge** y **integración completa**
 - **🚀 CI/CD automatizado** en GitHub Actions
@@ -384,8 +402,8 @@ graphqlstore/
 |---------|--------|----------------|
 | **v0.x.0** | ✅ | Despligue funcionamiento correcto |
 | **v1.0.0** | ✅ | Core completo |
-| **v2.0.0** | 🎯 **Actual** | Directivas avanzadas |
-| **v3.0.0** |  | Soporte GraphQL Server |
+| **v2.0.0** | ✅ | Directivas avanzadas |
+| **v3.0.0** | 🎯 **Actual** | Soporte GraphQL Server |
 ---
 
 ## 📚 Documentación
@@ -461,7 +479,15 @@ graphqlstore migracion \
 - [x] `@protected` - Campos protegidos
 
 ### 🚀 **v3.0.0** - GraphQL Server
-- [ ]  `server` - Lanzar servidor (en js o py) GraphQL
+- [x]  `server` - Crea un servidor GraphQL en Javacript de pruebas
+
+### 🏭 **v3.x.0** - Soporte GraphQL Server
+- [ ] Mejorar las funcionalidades del core
+- [ ] Mejorar toda documentación
+- [ ] Mejorar la implementación del servidor GraphQL.js
+- [ ] Implementar comando de inicio de sesion
+- [ ] Implementar comando logout
+- [ ] Implementar comando para gestionar la creacion de base de datos
 
 ### 🏭 **v4.0.0** - Multi-Database
 - [ ] Refactorizar modulos `GeneradorEsquemaMySQL` y `GenerarMigracionMySQL` implementando patrones de diseño para escalar el codigo y mejorar la mantenibilidad, sobre todo para implementar la funcionalidad multi-base de datos.
