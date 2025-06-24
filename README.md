@@ -72,7 +72,6 @@ GraphQLStore CLI es una herramienta de línea de comandos profesional que automa
 | `Enum` | `ENUM(...)` | Enumeraciones tipo-seguras |
 | `!` | `NOT NULL` | Validación de campos obligatorios |
 
-ahora crea una tabla para directivas soportadas
 ### 📜 Directivas Soportadas
 | Directiva | Descripción |
 |-----------|-------------|
