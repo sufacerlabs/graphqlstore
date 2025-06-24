@@ -438,7 +438,7 @@ graphqlstore inicializar
 ```bash
 # Migración automática
 graphqlstore migracion
-# ✅ Esquema actualizado preservando datos
+# ✅ Esquema actualizado preservando datos (de tablas y relaciones existentes)
 ```
 
 ### 🏭 **Integración CI/CD**
