@@ -31,7 +31,7 @@ GraphQLStore CLI es una herramienta de línea de comandos profesional que automa
 
 - 🔄 **Transformación Automática**: Convierte esquemas GraphQL a MySQL sin configuración manual
 - 🛡️ **Migraciones Seguras**: Evoluciona tu base de datos preservando la integridad de los datos
-- 🎨 **Visualización Rica**: Interfaz beautiful con Rich Console y syntax highlighting
+- 🎨 **Visualización Amigable**: Interfaz amigable con Rich Console y syntax highlighting
 - ⚡ **Detección Inteligente**: Encuentra y procesa esquemas automáticamente
 - 🔗 **Relaciones Avanzadas**: Soporte completo para relaciones 1:1, 1:N y N:M
 - 📊 **Producción Ready**: 97% de cobertura de tests y arquitectura escalable
@@ -63,7 +63,7 @@ GraphQLStore CLI es una herramienta de línea de comandos profesional que automa
 |---------|-------|----------------|
 | `ID` | `VARCHAR(25)` | Primary keys automáticos |
 | `String` | `VARCHAR(255)` | Soporte UTF-8 completo |
-| `Int` | `INT` | Enteros con validación |
+| `Int` | `INT` | Enteros |
 | `Boolean` | `BOOLEAN` | Valores true/false |
 | `DateTime` | `DATETIME` | Timestamps con @createdAt/@updatedAt |
 | `Float` | `DECIMAL(10,2)` | Precisión decimal |
@@ -210,7 +210,7 @@ ADD CONSTRAINT `fk_User_profile_Profile` FOREIGN KEY (`user_id`)
 REFERENCES `User`(id) ON DELETE CASCADE;
 ```
 
-### 📈 Visualización Rica
+### 📈 Visualización Amigable
 
 ```bash
 GraphQLStore CLI v3.0.0
@@ -483,6 +483,7 @@ graphqlstore migracion \
 
 ### 🏭 **v3.x.0** - Bugs, mejoras y documentacion
 - [x] Arreglar bugs y maltipados
+- [x] Mejorar el flujo de funcionamiento del comando conexión
 - [ ] Mejorar las funcionalidades del core
 - [ ] Mejorar toda documentación
 - [ ] Mejorar la implementación del servidor GraphQL.js
