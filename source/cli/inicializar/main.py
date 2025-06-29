@@ -78,7 +78,27 @@ def inicializar(args):
     consola.print("NUEVO ESQUEMA:\n", style="bold magenta")
 
     try:
-        # parsear esquema GraphQL
+        # cargar configuracion de la base de datos
+        ruta_archivo = Path.cwd() / ".graphqlstore_config.json"
+        loader = ConfiguracionJsonLoader(ruta_archivo)
+        config = loader.cargar_configuracion()
+
+        if not config:
+            return
+
+        adaptador = AdaptadorMySQL()
+        adaptador.conectar(config)
+
+        if not adaptador.empty_database():
+            consola.print(
+                "\n :cross_mark: ejecuta el comando "
+                "[bold green]migracion[/bold green] si deseas "
+                "modificar el esquema existente.\n",
+                style="bold yellow",
+            )
+            return
+
+        # parsear el esquema GraphQL
         parser = ParserGraphQLEsquema()
         informacion_parseada = parser.parse_esquema(esquema_contenido)
         consola.print("\nEsquema parseado correctamente.", style="bold green")
@@ -97,28 +117,6 @@ def inicializar(args):
             visualizar_salida=not args.no_visualizar_salida,
             visualizar_sql=not args.no_visualizar_sql,
         )
-
-        ruta_archivo = Path.cwd() / ".graphqlstore_config.json"
-        loader = ConfiguracionJsonLoader(ruta_archivo)
-        config = loader.cargar_configuracion()
-
-        if not config:
-            return
-
-        adaptador = AdaptadorMySQL()
-        adaptador.conectar(config)
-        adaptador.ejecutar_consulta("SHOW TABLES;")
-
-        tablas = adaptador.cursor.fetchall()
-
-        if len(tablas) != 0:
-            consola.print(
-                "\n :cross_mark: ejecuta el comando "
-                "[bold green]migracion[/bold green] si deseas "
-                "modificar el esquema existente.\n",
-                style="bold yellow",
-            )
-            return
 
         adaptador.ejecutar_consulta(sql)
         adaptador.cerrar_conexion()

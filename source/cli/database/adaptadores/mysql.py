@@ -101,3 +101,12 @@ class AdaptadorMySQL(AdaptadorDatabase):
             self.cursor.close()
         if self.conexion:
             self.conexion.close()
+
+    def empty_database(self) -> bool:
+        """Verificar si la base de datos está vacía."""
+        if not self.conexion or not self.cursor:
+            raise ValueError("Base de datos no conectada.")
+
+        self.ejecutar_consulta("SHOW TABLES;")
+        tablas = self.cursor.fetchall()
+        return len(tablas) == 0
