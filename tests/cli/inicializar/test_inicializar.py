@@ -391,9 +391,9 @@ def test_inicializar_sin_configuracion_db(
 
         mock_loader.cargar_configuracion.assert_called_once()
 
-        # verificar que se print se llamo 4 veces
+        # verificar que se print se llamo 3 veces
         # mostrando solo los mensajes iniciales
-        assert mock_console.return_value.print.call_count == 4
+        assert mock_console.return_value.print.call_count == 3
 
 
 # pylint: enable=too-many-arguments, too-many-positional-arguments
@@ -415,6 +415,7 @@ def test_inicializar_db_con_tablas_existentes(
     mock_adaptador = Mock(spec=AdaptadorMySQL)
     mock_adaptador.conectar.return_value = None
     mock_adaptador.ejecutar_consulta.return_value = None
+    mock_adaptador.empty_database.return_value = False
     mock_adaptador.cursor = Mock()
     mock_adaptador.cursor.fetchall.return_value = [("t1",), ("t2",)]
 
