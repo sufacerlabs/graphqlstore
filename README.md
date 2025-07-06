@@ -48,7 +48,7 @@ GraphQLStore CLI es una herramienta de línea de comandos profesional que automa
 | `probar-conexion` | Verificar conectividad y diagnósticos | ✅ |
 | `inicializar` | Crear base de datos desde esquema GraphQL | ✅  |
 | `migracion` | Evolucionar esquemas existentes | ✅ |
-| `server` | Crea un servidor GraphQL en js de **pruebas** | ✅ |
+| `server` | Genera una estructura de un servidor GraphQL de pruebas en JavaScript | ✅ |
 
 ### 🔧 Características Técnicas
 
@@ -71,18 +71,193 @@ GraphQLStore CLI es una herramienta de línea de comandos profesional que automa
 | `[]` | `JSON` | Listas de valores |
 | `Enum` | `ENUM(...)` | Enumeraciones tipo-seguras |
 | `!` | `NOT NULL` | Validación de campos obligatorios |
+| sin `!` | `NULL` | Campos opcionales |
 
 ### 📜 Directivas Soportadas
-| Directiva | Descripción |
-|-----------|-------------|
-| `@id` | Define un campo como clave primaria
-| `@unique` | Asegura que el campo sea único
-| `@default` | Establece un valor por defecto para el campo
-| `@db` | Renombra el campo en la base de datos
-| `@protected` | Oculta el campo en el esquema cliente
-| `@relation` | Define relaciones entre tipos
-| `@createdAt` | Marca el campo con la fecha de creación
-| `@updatedAt` | Marca el campo con la fecha de actualización
+| Directiva | Descripción | Argumentos |
+|-----------|-------------|------------|
+| `@id` | Define un campo como clave primaria | Ninguno |
+| `@unique` | Asegura que el campo sea único | Ninguno |
+| `@default` | Establece un valor por defecto para el campo | `value` |
+| `@db` | Renombra el campo en la base de datos | `rename` |
+| `@protected` | Oculta el campo en el esquema cliente | Ninguno |
+| `@relation` | Define relaciones entre tipos  | `name`, `type`, `onDelete` |
+| `@createdAt` | Marca el campo con la fecha de creación | Ninguno |
+| `@updatedAt` | Marca el campo con la fecha de actualización | Ninguno |
+
+#### Directiva @id - Clave 
+La directiva `@id` define un campo como clave primaria en la base de datos:
+
+**Sintaxis**:
+```graphql
+id: ID! @id
+```
+
+**Ejemplo**:
+```graphql
+type User {
+  id: ID! @id
+  nombre: String!
+}
+```
+
+**SQL generado**:
+```sql
+CREATE TABLE User (
+  id VARCHAR(25) NOT NULL PRIMARY KEY,
+  nombre VARCHAR(255) NOT NULL
+);
+```
+
+#### Directiva @unique - Campos Únicos
+La directiva `@unique` asegura que un campo de tipo escalar tenga valores únicos en la base de datos:
+
+**Sintaxis**:
+```graphql
+campo: Tipo! @unique
+```
+
+#### Directiva @default - Valores por defecto
+
+La directiva `@default` permite establecer valores por defecto para campos escalares:
+
+**Sintaxis**:
+```graphql
+campo: Tipo! @default(value: "valor_por_defecto")
+```
+
+**Ejemplos**:
+```graphql
+type User {
+  active: Boolean! @default(value: "true")
+  age: Int! @default(value: 18)
+  role: UserRole! @default(value: "ADMIN")
+}
+```
+
+**SQL generado**:
+```sql
+CREATE TABLE User (
+  active BOOLEAN NOT NULL DEFAULT true,
+  age INT NOT NULL DEFAULT 18,
+  role ENUM('ADMIN', 'AUTHOR', 'USER') NOT NULL DEFAULT 'ADMIN'
+);
+```
+
+#### Directiva @db - Renombrado de columnas
+
+La directiva `@db` permite usar nombres diferentes entre GraphQL y la base de datos:
+
+**Sintaxis**:
+```graphql
+campo: Tipo! @db(rename: "nombre_columna_sql")
+```
+
+**Ejemplos**:
+```graphql
+type User {
+   fullName: String! @db(rename: "full_name")
+   email: String! @db(rename: "email_address")
+   phone: String @db(rename: "phone_number")
+}
+```
+
+**SQL generado**:
+```sql
+CREATE TABLE User (
+  full_name VARCHAR(255) NOT NULL,
+  email_address VARCHAR(255) NOT NULL,
+  phone_number VARCHAR(255)
+);
+```
+
+#### Directiva @relation - Relaciones avanzadas
+
+La directiva `@relation` gestiona relaciones complejas entre tipos con control granular:
+
+**Sintaxis**:
+```graphql
+campo: [Tipo] @relation(name: "NombreRelacion", type: TIPO_RELACION, onDelete: ACCION)
+```
+
+**Argumentos**:
+- `name`: Nombre único de la relación (requerido para toda relacion)
+- `type`: Tipo de relación física
+  - `INLINE`: Opcional para relaciones 1:1 y 1:N (clave foránea)
+  - `TABLA`: Requerido para relaciones N:M (tabla intermedia)
+- `onDelete`: Acción al eliminar registro padre
+  - `CASCADE`: Eliminación en cascada (elimina registros hijos)
+  - `SET_NULL`: Establece NULL en registros hijos (no elimina)
+
+**Ejemplos de relaciones 1:N con INLINE**:
+```graphql
+type User {
+   id: ID! @id
+   email: String! @unique
+   posts: [Post] @relation(name: "UserPosts")
+}
+
+type Post {
+   id: ID! @id
+   title: String!
+   author: User! @relation(name: "UserPosts", onDelete: CASCADE)
+}
+```
+
+**SQL generado para 1:N**:
+```sql
+-- Tabla User
+CREATE TABLE User (
+   id VARCHAR(25) NOT NULL PRIMARY KEY,
+   email VARCHAR(255) NOT NULL UNIQUE
+   );
+
+-- Tabla Post con clave foránea
+CREATE TABLE Post (
+   id VARCHAR(25) NOT NULL PRIMARY KEY,
+   author_id VARCHAR(25) NOT NULL,
+   FOREIGN KEY (author_id) REFERENCES User(id) ON DELETE CASCADE
+);
+```
+
+**Ejemplos de relaciones N:M con TABLA**:
+```graphql
+type Post {
+   id: ID! @id
+   title: String!
+   tags: [Tag] @relation(name: "PostTags", type: TABLA, onDelete: CASCADE)
+}
+
+type Tag {
+   id: ID! @id
+   name: String! @unique
+   posts: [Post] @relation(name: "PostTags", type: TABLA, onDelete: CASCADE)
+}
+```
+
+**SQL generado para N:M**:
+```sql
+-- Tabla Post
+CREATE TABLE Post (
+   id VARCHAR(25) NOT NULL PRIMARY KEY,
+   title VARCHAR(255) NOT NULL
+);
+
+-- Tabla Tag
+CREATE TABLE Tag (
+   id VARCHAR(25) NOT NULL PRIMARY KEY,
+   name VARCHAR(255) NOT NULL UNIQUE
+);
+
+-- Tabla intermedia PostTags
+CREATE TABLE PostTags (
+   post_id VARCHAR(25) NOT NULL,
+   tag_id VARCHAR(25) NOT NULL,
+   PRIMARY KEY (post_id, tag_id),
+   FOREIGN KEY (post_id) REFERENCES Post(id) ON DELETE CASCADE,
+   FOREIGN KEY (tag_id) REFERENCES Tag(id) ON DELETE CASCADE
+);
+```
 
 ---
 
@@ -123,10 +298,21 @@ graphqlstore conexion \
 graphqlstore probar-conexion --verbose
 ```
 
+#### 3. ***Diseñar Esquema GraphQL**
+```graphq
+type User {
+   id: ID! @id
+   username: String!
+   email: String! @unique
+}
+```
+
 #### 3. **Inicializar Base de Datos**
 ```bash
 # Desde archivo específico
-graphqlstore inicializar --esquema mi_esquema.graphql
+# NOTA: Es necesario indicar el esquema si hay varios archivos .graphql
+# en el directorio actual
+graphqlstore inicializar --esquema schema.graphql
 
 # Detección automática
 graphqlstore inicializar
@@ -135,8 +321,18 @@ graphqlstore inicializar
 #### 4. **Evolucionar Esquema** 
 ```bash
 # Migración automática
-graphqlstore migracion --esquema mi_esquema_v2.graphql
+# NOTA: Es necesario indicar el esquema si hay varios archivos .graphql
+# en el directorio actual
+graphqlstore migracion --esquema schema.graphql
 ```
+
+**NOTA: SI DESEAS COMPROBAR O INTEGRAR LA HERRAMIENTA EN BACKEND CON ARQUITECTURA GRAPHQL, SERA NECESARIO EJECUTAR PRIMERO `graphqlstore servidor` PARA GENERAR LA ESTRUCTURA DEL SERVIDOR.**
+
+```bash
+graphqlstore servidor
+```
+
+PARA MAYOR INFORMACIÓN SOBRE EL COMANDO `servidor`, CONSULTE LA DOCUMENTACIÓN DEL COMANDO [servidor](source/cli/servidor/README.md).
 
 ---
 
@@ -316,12 +512,12 @@ graphqlstore/
 | **Procesador Relaciones** | 96 | 4 | 38 | 6 | **93%** |
 | **Generador MySQL** | 237 | 5 | 94 | 11 | **95%** |
 | **Sistema Migraciones** | 396 | 17 | 208 | 23 | **93%** |
-| **Comandos CLI** | 252 | 11 | 54 | 2 | **100%** |
-| **🎯 TOTAL PROYECTO** | **3098** | **52** | **468** | **49** | **🏆 97%** |
+| **Comandos CLI** | 271 | 11 | 52 | 3 | **100%** |
+| **🎯 TOTAL PROYECTO** | **3113** | **57** | **472** | **49** | **🏆 97%** |
 
 ### ✅ Suite de Pruebas (TOTAL PROYECTO)
 
-- **📈 126 pruebas** ejecutándose en **5.49 segundos**
+- **📈 127 pruebas** ejecutándose en **5.00 segundos**
 - **🎯 97% cobertura global** con **0 fallos**
 - **🔍 Casos edge** y **integración completa**
 - **🚀 CI/CD automatizado** en GitHub Actions
@@ -402,7 +598,7 @@ graphqlstore/
 | **v0.x.0** | ✅ | Despligue funcionamiento correcto |
 | **v1.0.0** | ✅ | Core completo |
 | **v2.0.0** | ✅ | Directivas avanzadas |
-| **v3.0.0** | ✅ | Soporte servidor GraphQL en JS |
+| **v3.0.0** | ✅ | Generador de servidor GraphQL en JavaScript |
 | **v3.x.0** | 🎯 **Actual** | Bugs, mejoras y documentación |
 ---
 
@@ -414,6 +610,7 @@ graphqlstore/
 - 🩺 **[Comando `probar-conexion`](source/cli/probar_conexion/README.md)** - Diagnósticos y validación de base de datos
 - 🚀 **[Comando `inicializar`](source/cli/inicializar/README.md)** - Inicialización de esquemas
 - 📈 **[Comando `migracion`](source/cli/migracion/README.md)** - Sistema de migraciones
+- 🔍 **[Comando `servidor`](source/cli/servidor/README.md)** - Generador de servidor GraphQL en JavaScript
 
 ### 🔧 Documentación Técnica
 
@@ -479,14 +676,15 @@ graphqlstore migracion \
 - [x] `@protected` - Campos protegidos
 
 ### 🚀 **v3.0.0** - GraphQL Server
-- [x]  `server` - Crea un servidor GraphQL en Javacript de pruebas
+- [x]  `server` - Genera estructura de servidor GraphQL en JavaScript
 
 ### 🏭 **v3.x.0** - Bugs, mejoras y documentacion
 - [x] Arreglar bugs y maltipados
 - [x] Mejorar el flujo de funcionamiento del comando conexión
-- [ ] Mejorar las funcionalidades del core
-- [ ] Mejorar toda documentación
-- [ ] Mejorar la implementación del servidor GraphQL.js
+- [x] Mejorar las funcionalidades del core
+- [x] Agregar documentación del comando `servidor`
+- [x] Mejorar toda documentación
+- [x] Mejorar la implementación del servidor GraphQL.js
 - [ ] Implementar comando de inicio de sesion
 - [ ] Implementar comando logout
 - [ ] Implementar comando para gestionar la creacion de base de datos
