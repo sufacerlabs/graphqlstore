@@ -49,13 +49,26 @@ def migracion(args):
     esquema_antiguo = GestorArchivo.leer_archivo(esquema_backup)
 
     if not args.esquema:
-        # si no se proporciona un esquema, buscar unopor defecto
+        # si no se proporciona un esquema, buscar uno por defecto
         # en el directorio actual
-        esquema_archivo = next(Path.cwd().glob("*.graphql"), None)
+        # obtener todos los archivos .graphql en el directorio actual
+        esquema_archivo = list(Path.cwd().glob("*.graphql"))
 
+        # si hay mas de un archivo .graphql, mostrar un error
+        if len(esquema_archivo) > 1:
+            consola.print(
+                "Se encontraron múltiples archivos .graphql en el "
+                "directorio actual. Por favor, especifique un "
+                "esquema específico usando el parámetro --esquema.",
+                style="bold red",
+            )
+            return
+
+        # si hay exactamente un archivo .graphql, usarlo
+        esquema_archivo = esquema_archivo[0] if esquema_archivo else None
         if esquema_archivo is None:
             consola.print(
-                "❌ No se ha proporcionado un esquema y tampoco se ha "
+                "No se ha proporcionado un esquema y tampoco se ha "
                 "encontrado un archivo .graphql en el directorio actual.",
                 style="bold red",
             )
