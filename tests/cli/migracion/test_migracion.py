@@ -638,3 +638,45 @@ def test_migracion_validacion_parametros_entrada(
         assert mock_args.no_visualizar_salida is False
         assert mock_args.no_visualizar_sql is False
     # pylint: enable=too-many-arguments,too-many-positional-arguments
+
+
+def test_mig_multi_archivos_gql_sin_esquema_especificado(
+    mock_args_sin_esquema, ruta_proyecto, esquema_anterior, mock_loader
+):
+    """Prueba que verifica el comportamiento al encontrar
+    varios archivos .graphql."""
+
+    mock_esquema_archivos = [
+        ruta_proyecto / "schema1.graphql",
+        ruta_proyecto / "schema2.graphql",
+    ]
+
+    with (
+        patch(
+            "source.cli.migracion.main.Path.cwd",
+            return_value=ruta_proyecto,
+        ),
+        patch("source.cli.migracion.main.Path.exists", return_value=True),
+        patch(
+            "source.cli.migracion.main.GestorArchivo.leer_archivo",
+            side_effect=[esquema_anterior],
+        ),
+        patch.object(Path, "glob", return_value=iter(mock_esquema_archivos)),
+        patch(
+            "source.cli.migracion.main.ConfiguracionJsonLoader",
+            return_value=mock_loader,
+        ),
+        patch("source.cli.migracion.main.Console") as mock_console,
+    ):
+        migracion(mock_args_sin_esquema)
+
+        # verificar que se leyeron los archivos .graphql
+        assert len(mock_esquema_archivos) == 2
+
+        # verificar que se muestra un mensaje de error
+        mock_console.return_value.print.assert_called_once_with(
+            "Se encontraron múltiples archivos .graphql en el "
+            "directorio actual. Por favor, especifique un "
+            "esquema específico usando el parámetro --esquema.",
+            style="bold red",
+        )
