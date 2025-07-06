@@ -4,7 +4,6 @@ import json
 from pathlib import Path
 from rich.console import Console
 
-from ..loaders.conf_json_loader import ConfiguracionJsonLoader
 from ..utilidades.gestor_archivo import GestorArchivo
 
 console = Console()
@@ -25,24 +24,11 @@ def servidor():
             style="yellow",
         )
 
-        ruta_archivo = Path.cwd() / ".graphqlstore_config.json"
-
-        if ruta_archivo.exists():
-            loader = ConfiguracionJsonLoader(ruta_archivo)
-            config = loader.cargar_configuracion()
-        else:
-            config = {
-                "DB_HOST": "localhost",
-                "DB_PUERTO": 3306,
-                "DB_USUARIO": "root",
-                "DB_PASSWORD": "root",
-                "DB_NOMBRE": "testdb",
-            }
-
         # Generar archivos del servidor
         _generar_package_json(directorio_servidor)
-        _generar_index_js(directorio_servidor, config)
-        _generar_graphql(directorio_servidor)
+        _generar_index_js(directorio_servidor)
+        _generar_schema_graphql(directorio_servidor)
+        _generar_qm_graphql(directorio_servidor)
         _generar_resolvers(directorio_servidor)
 
         msg = "Ejecuta tu servidor GraphQL de pruebas"
@@ -89,7 +75,7 @@ def _generar_package_json(directorio: Path):
     console.print("  ✅ package.json generado", style="green")
 
 
-def _generar_index_js(directorio: Path, conf):
+def _generar_index_js(directorio: Path):
     """Generar archivo index.js con servidor Apollo y MySQL"""
 
     contenido_js = """import mysql from 'mysql2/promise';
@@ -100,6 +86,7 @@ import { addResolversToSchema, mergeSchemas } from '@graphql-tools/schema';
 import { ApolloServer } from 'apollo-server';
 import short from 'short-uuid';
 import resolvers from './resolvers.js';
+import gqlstore_conf from './.graphqlstore_config.json' with { type: 'json' };
 
 async function main() {
 
@@ -121,16 +108,14 @@ async function main() {
     }
   )
 
-// Configuración de conexión a MySQL
-"""
-    contenido_js += f"""
-  const pool = mysql.createPool({{
-      host: '{conf["DB_HOST"]}',
-      port: {conf["DB_PUERTO"]},
-      user: '{conf["DB_USUARIO"]}',
-      password: '{conf["DB_PASSWORD"]}',
-      database: '{conf["DB_NOMBRE"]}',
-  }});
+  // Configuración de conexión a MySQL
+  const pool = mysql.createPool({
+    host: gqlstore_conf.DB_HOST || 'localhost',
+    port: gqlstore_conf.DB_PORT || 3306,
+    user: gqlstore_conf.DB_USUARIO || 'root',
+    password: gqlstore_conf.DB_PASSWORD || 'root',
+    database: gqlstore_conf.DB_NOMBRE || 'graphqlstore',
+  });
 
 """
     contenido_js += """
@@ -214,7 +199,61 @@ main().catch((error) => {
     console.print("  ✅ index.js generado", style="green")
 
 
-def _generar_graphql(directorio: Path):
+def _generar_schema_graphql(directorio: Path):
+    """Generar archivo para gestionar el esquema GraphQL y DB"""
+
+    contenido_graphql = """scalar DateTime
+scalar Json
+
+\"""Tipo que representa un usuario en el sistema.\"""
+type User {
+    "Identificador único del usuario."
+    id: ID! @id
+    name: String
+    email: String! @unique
+    password: String! @protected
+    "posts del usuario"
+    posts: [Post] @relation(name: "UserPosts")
+    createdAt: DateTime @createdAt
+    updatedAt: DateTime @updatedAt
+}
+
+\"""
+Tipo que representa un post en el sistema.
+\"""
+type Post {
+    "Indentificador unico del post."
+    id: ID! @id
+    "Título del post."
+    title: String!
+    "Contenido del post."
+    content: String!
+    "Estado del post."
+    state: PostState! @default(value: DRAFT)
+    "Usuario que creó el post."
+    owner: User! @relation(name: "UserPosts",  onDelete: CASCADE)
+}
+
+\"""
+Enum que representa los estados posibles de un post.
+\"""
+enum PostState {
+    "Post en borrador."
+    DRAFT
+    "Post publicado."
+    PUBLISHED
+    "Post archivado."
+    ARCHIVED
+}
+"""
+
+    archivo_schema = directorio / "schema.graphql"
+    GestorArchivo.escribir_archivo(contenido_graphql, archivo_schema)
+
+    console.print("  ✅ schema.graphql generado", style="green")
+
+
+def _generar_qm_graphql(directorio: Path):
     """Generar archivos GraphQL de ejemplo"""
 
     contenido_graphql = """# import User from './generated/schema.graphql'
