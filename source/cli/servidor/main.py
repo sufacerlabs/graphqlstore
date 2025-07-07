@@ -111,7 +111,7 @@ async function main() {
   // Configuración de conexión a MySQL
   const pool = mysql.createPool({
     host: gqlstore_conf.DB_HOST || 'localhost',
-    port: gqlstore_conf.DB_PORT || 3306,
+    port: gqlstore_conf.DB_PUERTO || 3306,
     user: gqlstore_conf.DB_USUARIO || 'root',
     password: gqlstore_conf.DB_PASSWORD || 'root',
     database: gqlstore_conf.DB_NOMBRE || 'graphqlstore',
