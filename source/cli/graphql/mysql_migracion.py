@@ -775,7 +775,7 @@ class GeneradorMigracionMySQL:
 
     def _determinar_tabla_fk(self, relacion: InfoRelacion) -> str:
         """Determinar en qué tabla va la foreign key."""
-        if relacion.tipo_relation == TipoRelacion.ONE_TO_MANY.value:
+        if relacion.tipo_relation == TipoRelacion.MANY_TO_ONE.value:
             return (
                 relacion.objetivo.tabla_objetivo
                 if relacion.fuente.fuente_es_lista
@@ -793,7 +793,7 @@ class GeneradorMigracionMySQL:
     def _determinar_campo_fk(self, relacion: InfoRelacion) -> str:
         """Determinar nombre del campo foreign key."""
         campo_fk = relacion.fuente.campo_fuente
-        if relacion.tipo_relation == TipoRelacion.ONE_TO_MANY.value:
+        if relacion.tipo_relation == TipoRelacion.MANY_TO_ONE.value:
             campo_fk = (
                 relacion.fuente.tabla_fuente.lower()
                 if relacion.fuente.fuente_es_lista
@@ -873,7 +873,7 @@ class GeneradorMigracionMySQL:
         # determinar ON DELETE
 
         actual_on_delete = "SET NULL"
-        if relacion.tipo_relation == TipoRelacion.ONE_TO_MANY.value:
+        if relacion.tipo_relation == TipoRelacion.MANY_TO_ONE.value:
             actual_on_delete = relacion.objetivo.on_delete_inverso
         else:
             if relacion.fuente.on_delete == OnDelete.CASCADE.value and (

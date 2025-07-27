@@ -84,8 +84,8 @@ def fixture_tablas_simples():
     }
 
 
-@pytest.fixture(name="relacion_one_to_many")
-def fixture_relacion_one_to_many():
+@pytest.fixture(name="relacion_many_to_one")
+def fixture_relacion_many_to_one():
     """Fixture para una relación one-to-many."""
     return {
         "User": InfoTabla(
@@ -485,15 +485,15 @@ def fixture_proceso_con_tablas_simples(
     )
 
 
-@pytest.fixture(name="proceso_con_relacion_one_to_many")
-def fixture_proceso_con_relacion_one_to_many(
-    relacion_one_to_many,
+@pytest.fixture(name="proceso_con_relacion_many_to_one")
+def fixture_proceso_con_relacion_many_to_one(
+    relacion_many_to_one,
     tipos_escalares,
     tipos_enumerados,
 ):
     """Fixture que proporciona un procesador con una relación one-to-many"""
     return ProcesarRelaciones(
-        tablas=relacion_one_to_many,
+        tablas=relacion_many_to_one,
         scalar_types=tipos_escalares,
         enum_types=tipos_enumerados,
     )
@@ -654,11 +654,11 @@ def test_validar_relacion_many_to_many_con_link_erroneo(
     assert "debe usarse tipo de link TABLE." in str(ex_inf.value)
 
 
-def test_procesar_relacion_one_to_many(
-    proceso_con_relacion_one_to_many,
+def test_procesar_relacion_many_to_one(
+    proceso_con_relacion_many_to_one,
 ):
     """Prueba procesar una relación one-to-many"""
-    relaciones = proceso_con_relacion_one_to_many.procesar_relaciones()
+    relaciones = proceso_con_relacion_many_to_one.procesar_relaciones()
 
     assert len(relaciones) == 1
     rela = relaciones[0]
@@ -666,7 +666,7 @@ def test_procesar_relacion_one_to_many(
     # verificar informacion de la relación
     assert isinstance(rela, InfoRelacion)
     assert rela.nombre_relacion == "UserPosts"
-    assert rela.tipo_relation == TipoRelacion.ONE_TO_MANY.value
+    assert rela.tipo_relation == TipoRelacion.MANY_TO_ONE.value
     assert rela.tipo_link == TipoLink.INLINE.value  # valor por defecto
 
     # verificar fuente

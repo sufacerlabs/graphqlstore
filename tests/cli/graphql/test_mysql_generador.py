@@ -39,6 +39,18 @@ def fixture_campo_id():
     )
 
 
+@pytest.fixture(name="campo_name")
+def fixture_campo_name():
+    """Fixture que proporciona un campo name."""
+    return InfoField(
+        nombre="name",
+        tipo_campo="String",
+        es_lista=False,
+        es_requerido=True,
+        directivas={},
+    )
+
+
 @pytest.fixture(name="tablas_simples")
 def fixture_tablas_simples(campo_id):
     # pylint: disable=duplicate-code
@@ -113,9 +125,9 @@ def fixture_enums_basicos():
     }
 
 
-@pytest.fixture(name="relacion_one_to_many")
-def fixture_relacion_one_to_many():
-    """Fixture con una relacion one-to-many."""
+@pytest.fixture(name="relation_many_to_one")
+def fixture_relation_many_to_one():
+    """Fixture with a relation many to one."""
     return [
         InfoRelacion(
             fuente=FuenteRelacion(
@@ -131,7 +143,7 @@ def fixture_relacion_one_to_many():
                 nombre_constraint_objetivo=None,
                 on_delete_inverso=OnDelete.CASCADE.value,
             ),
-            tipo_relation=TipoRelacion.ONE_TO_MANY.value,
+            tipo_relation=TipoRelacion.MANY_TO_ONE.value,
             nombre_relacion="UserPosts",
             tipo_link=TipoLink.INLINE.value,
         )
@@ -257,7 +269,7 @@ def fixture_relacion_one_to_one_sin_campo_inverso():
 
 
 @pytest.fixture(name="tabla_con_relaciones_otm")
-def fixture_tabla_con_relaciones_otm(campo_id):
+def fixture_tabla_con_relaciones_otm(campo_id, campo_name):
     """Fixture con tablas que tienen relaciones 1:N."""
     # pylint: disable=duplicate-code
     return {
@@ -265,13 +277,7 @@ def fixture_tabla_con_relaciones_otm(campo_id):
             nombre="User",
             campos={
                 "id": campo_id,
-                "name": InfoField(
-                    nombre="name",
-                    tipo_campo="String",
-                    es_lista=False,
-                    es_requerido=True,
-                    directivas={},
-                ),
+                "name": campo_name,
                 "posts": InfoField(
                     nombre="posts",
                     tipo_campo="Post",
@@ -353,7 +359,7 @@ def fixture_tabla_con_relaciones_otm(campo_id):
 
 
 @pytest.fixture(name="tabla_con_relaciones_mtm")
-def fixture_tabla_con_relaciones_mtm(campo_id):
+def fixture_tabla_con_relaciones_mtm(campo_id, campo_name):
     """Fixture con tablas que tienen relaciones N:M."""
     # pylint: disable=duplicate-code
     return {
@@ -382,13 +388,7 @@ def fixture_tabla_con_relaciones_mtm(campo_id):
             nombre="Role",
             campos={
                 "id": campo_id,
-                "name": InfoField(
-                    nombre="name",
-                    tipo_campo="String",
-                    es_lista=False,
-                    es_requerido=True,
-                    directivas={},
-                ),
+                "name": campo_name,
                 "users": InfoField(
                     nombre="users",
                     tipo_campo="User",
@@ -411,7 +411,7 @@ def fixture_tabla_con_relaciones_mtm(campo_id):
 
 
 @pytest.fixture(name="tabla_con_relaciones_oto")
-def fixture_tabla_con_relaciones_oto(campo_id):
+def fixture_tabla_con_relaciones_oto(campo_id, campo_name):
     """Fixture con tablas que tienen relaciones 1:1."""
     # pylint: disable=duplicate-code
     return {
@@ -419,13 +419,7 @@ def fixture_tabla_con_relaciones_oto(campo_id):
             nombre="User",
             campos={
                 "id": campo_id,
-                "name": InfoField(
-                    nombre="name",
-                    tipo_campo="String",
-                    es_lista=False,
-                    es_requerido=True,
-                    directivas={},
-                ),
+                "name": campo_name,
                 "profile": InfoField(
                     nombre="profile",
                     tipo_campo="Profile",
@@ -475,7 +469,7 @@ def fixture_tabla_con_relaciones_oto(campo_id):
 
 
 @pytest.fixture(name="tabla_con_relaciones_oto_con_fuente_cascade")
-def fixture_tabla_con_relaciones_oto_con_fuente_cascade(campo_id):
+def fixture_tabla_con_relaciones_oto_con_fuente_cascade(campo_id, campo_name):
     """Fixture con tablas que tienen relaciones 1:1 con fuente CASCADE."""
     # pylint: disable=duplicate-code
     return {
@@ -483,13 +477,7 @@ def fixture_tabla_con_relaciones_oto_con_fuente_cascade(campo_id):
             nombre="User",
             campos={
                 "id": campo_id,
-                "name": InfoField(
-                    nombre="name",
-                    tipo_campo="String",
-                    es_lista=False,
-                    es_requerido=True,
-                    directivas={},
-                ),
+                "name": campo_name,
                 "profile": InfoField(
                     nombre="profile",
                     tipo_campo="Profile",
@@ -639,14 +627,14 @@ def test_get_esquema_sql(generador_mysql):
 def test_generar_esquema_otm(
     generador_mysql,
     tabla_con_relaciones_otm,
-    relacion_one_to_many,
+    relation_many_to_one,
 ):
     """Prueba la generacion completa del esquema con rel 1:N."""
     with patch.object(generador_mysql.consola, "print"):
         sql = generador_mysql.generar_esquema(
             tablas=tabla_con_relaciones_otm,
             enums={},
-            relaciones=relacion_one_to_many,
+            relaciones=relation_many_to_one,
             visualizar_salida=False,
             visualizar_sql=False,
         )
@@ -843,13 +831,13 @@ def test_visualizar_salida_relaciones_mtm(
 
 def test_visualizar_salida_relaciones_otm(
     generador_mysql,
-    relacion_one_to_many,
+    relation_many_to_one,
 ):
     """Prueba la visualizacion de salida de relaciones 1:N."""
     with patch.object(generador_mysql.consola, "print") as mock_print:
         # pylint: disable=protected-access
         generador_mysql._visualizar_salida_relaciones(
-            relacion=relacion_one_to_many[0],
+            relacion=relation_many_to_one[0],
             data_sql="ALTER TABLE Post ADD COLUMN posts_id VARCHAR(25);",
             visualizar_salida=True,
             visualizar_sql=True,
@@ -889,20 +877,14 @@ def fixture_relacion_itself():
 
 
 @pytest.fixture(name="tabla_con_relaciones_itself")
-def fixture_tabla_con_relaciones_itself(campo_id):
+def fixture_tabla_con_relaciones_itself(campo_id, campo_name):
     """Fixture con tablas que tienen relaciones de tipo itself."""
     return {
         "User": InfoTabla(
             nombre="friends",
             campos={
                 "id": campo_id,
-                "name": InfoField(
-                    nombre="name",
-                    tipo_campo="String",
-                    es_lista=False,
-                    es_requerido=True,
-                    directivas={},
-                ),
+                "name": campo_name,
                 "friends": InfoField(
                     nombre="friends",
                     tipo_campo="User",
