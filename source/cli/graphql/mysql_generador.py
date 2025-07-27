@@ -240,7 +240,7 @@ class GeneradorEsquemaMySQL:
             tipo_relacion
             in [
                 TipoRelacion.ONE_TO_ONE.value,
-                TipoRelacion.ONE_TO_MANY.value,
+                TipoRelacion.MANY_TO_ONE.value,
             ]
             and tipo_link == TipoLink.INLINE.value
         ):
@@ -249,7 +249,7 @@ class GeneradorEsquemaMySQL:
             campo_fk = None
             actual_on_delete = None
 
-            if tipo_relacion == TipoRelacion.ONE_TO_MANY.value:
+            if tipo_relacion == TipoRelacion.MANY_TO_ONE.value:
                 # si la fuente tiene [Target] entonces la clave
                 # foranea va en la tabla objetivo
                 tabla_fk = tabla_objetivo
@@ -257,38 +257,52 @@ class GeneradorEsquemaMySQL:
                 campo_fk = tabla_fuente.lower()
                 actual_on_delete = on_delete_inverso
 
-            # si es una relacion 1:1, la clave foranea va en el lado
-            # del onDelete: CASCADE
-            elif (
-                on_delete == OnDelete.CASCADE.value
-                and on_delete_inverso != OnDelete.CASCADE.value
-            ):
-                # la fuente tiene CASCADE, target no
-                tabla_fk = tabla_fuente
-                tabla_ref = tabla_objetivo
-                campo_fk = tabla_fuente.lower()
-                actual_on_delete = on_delete
+            # elif tipo_relacion == TipoRelacion.MANY_TO_ONE.value:
+            #     # if the source has Target but the target has
+            #     # [Source] then the foreign key goes in the source table
+            #     tabla_fk = tabla_fuente
+            #     tabla_ref = tabla_objetivo
+            #     campo_fk = tabla_objetivo.lower()
+            #     actual_on_delete = on_delete
 
-                if not relacion.objetivo.campo_inverso:
-                    campo_fk = campo_fuente
-            elif (
-                on_delete != OnDelete.CASCADE.value
-                and on_delete_inverso == OnDelete.CASCADE.value
-            ):
-                # la fuente no tiene CASCADE, target
-                if relacion.objetivo.campo_inverso:
-                    tabla_fk = tabla_objetivo
-                    tabla_ref = tabla_fuente
-                    # usamos el  nombre del campo actual
-                    # desde la tabla objetivo
-                    campo_fk = relacion.objetivo.campo_inverso
-                    actual_on_delete = on_delete_inverso
+            elif tipo_relacion == TipoRelacion.ONE_TO_ONE.value:
+                # si es una relacion 1:1, la clave foranea va en el lado
+                # del onDelete: CASCADE
+                if (
+                    on_delete == OnDelete.CASCADE.value
+                    and on_delete_inverso != OnDelete.CASCADE.value
+                ):
+                    # la fuente tiene CASCADE, target no
+                    tabla_fk = tabla_fuente
+                    tabla_ref = tabla_objetivo
+                    campo_fk = tabla_fuente.lower()
+                    actual_on_delete = on_delete
+
+                    if not relacion.objetivo.campo_inverso:
+                        campo_fk = campo_fuente
+                elif (
+                    on_delete != OnDelete.CASCADE.value
+                    and on_delete_inverso == OnDelete.CASCADE.value
+                ):
+                    # la fuente no tiene CASCADE, target
+                    if relacion.objetivo.campo_inverso:
+                        tabla_fk = tabla_objetivo
+                        tabla_ref = tabla_fuente
+                        # usamos el  nombre del campo actual
+                        # desde la tabla objetivo
+                        campo_fk = relacion.objetivo.campo_inverso
+                        actual_on_delete = on_delete_inverso
+                else:
+                    # ambos tienen cascade or ninguno has cascade (ambiguidad)
+                    raise RelationshipError(
+                        "Configuracion de relacion ambigua ",
+                        f"para {nombre_relacion} Ambos lados ",
+                        "tienen onDelete: CASCADE o ninguno lo tiene. ",
+                    )
             else:
-                # ambos tienen cascade or ninguno has cascade (ambiguidad)
                 raise RelationshipError(
-                    "Configuracion de relacion ambigua ",
-                    f"para {nombre_relacion} Ambos lados ",
-                    "tienen onDelete: CASCADE o ninguno lo tiene. ",
+                    "Tipo de relacion no soportada: ",
+                    f"{tipo_relacion} para {nombre_relacion}",
                 )
 
             # agregar llave foranea para la tabla que
@@ -302,7 +316,7 @@ class GeneradorEsquemaMySQL:
 
             # verificar si el campo es requerido
             es_requerido = False
-            if tipo_relacion == TipoRelacion.ONE_TO_MANY.value and fue_es_list:
+            if tipo_relacion == TipoRelacion.MANY_TO_ONE.value and fue_es_list:
                 # verificar si la referencia del objetivo
                 # a la fuente es requerida
                 if (

@@ -244,7 +244,7 @@ class ProcesarRelaciones:
             or campo_inverso
             and self.tablas[tabla_objetivo].campos[campo_inverso].es_lista
         ):
-            tipo_relacion = TipoRelacion.ONE_TO_MANY.value
+            tipo_relacion = TipoRelacion.MANY_TO_ONE.value
 
         return tipo_relacion
 
