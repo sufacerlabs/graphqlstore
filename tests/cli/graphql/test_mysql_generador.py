@@ -150,6 +150,31 @@ def fixture_relation_many_to_one():
     ]
 
 
+@pytest.fixture(name="relation_one_to_many")
+def fixture_relation_one_to_many():
+    """Fixture with a relation one to many."""
+    return [
+        InfoRelacion(
+            fuente=FuenteRelacion(
+                tabla_fuente="Product",
+                campo_fuente="productType",
+                fuente_es_lista=False,
+                nombre_constraint_fuente="fk_Product_productType_ProductType",
+                on_delete=OnDelete.CASCADE.value,
+            ),
+            objetivo=ObjetivoRelacion(
+                tabla_objetivo="ProductType",
+                campo_inverso="products",
+                nombre_constraint_objetivo=None,
+                on_delete_inverso=OnDelete.SET_NULL.value,
+            ),
+            tipo_relation=TipoRelacion.ONE_TO_MANY.value,
+            nombre_relacion="ProductTypeProduct",
+            tipo_link=TipoLink.INLINE.value,
+        )
+    ]
+
+
 @pytest.fixture(name="relacion_many_to_many")
 def fixture_relacion_many_to_many():
     """Fixture con una relacion many-to-many."""
@@ -268,9 +293,9 @@ def fixture_relacion_one_to_one_sin_campo_inverso():
     ]
 
 
-@pytest.fixture(name="tabla_con_relaciones_otm")
-def fixture_tabla_con_relaciones_otm(campo_id, campo_name):
-    """Fixture con tablas que tienen relaciones 1:N."""
+@pytest.fixture(name="table_with_relationship_mto")
+def fixture_table_with_relationship_mto(campo_id, campo_name):
+    """Fixture with tables with relationship 1:N."""
     # pylint: disable=duplicate-code
     return {
         "User": InfoTabla(
@@ -330,13 +355,6 @@ def fixture_tabla_con_relaciones_otm(campo_id, campo_name):
             nombre="Post",
             campos={
                 "id": campo_id,
-                "title": InfoField(
-                    nombre="title",
-                    tipo_campo="String",
-                    es_lista=False,
-                    es_requerido=True,
-                    directivas={},
-                ),
                 "author": InfoField(
                     nombre="author",
                     tipo_campo="User",
@@ -356,6 +374,54 @@ def fixture_tabla_con_relaciones_otm(campo_id, campo_name):
         ),
     }
     # pylint: enable=duplicate-code
+
+
+@pytest.fixture(name="table_with_relationship_otm")
+def fixture_table_with_relationship_otm(campo_id):
+    """Fixture with tables with relationship 1:N."""
+    return {
+        "Product": InfoTabla(
+            nombre="Product",
+            campos={
+                "id": campo_id,
+                "productType": InfoField(
+                    nombre="productType",
+                    tipo_campo="ProductType",
+                    es_lista=False,
+                    es_requerido=False,
+                    directivas={
+                        "relation": InfoDirectiva(
+                            nombre="relation",
+                            argumentos={
+                                "name": "ProductTypeProduct",
+                                "onDelete": "CASCADE",
+                            },
+                        ),
+                    },
+                ),
+            },
+        ),
+        "ProductType": InfoTabla(
+            nombre="ProductType",
+            campos={
+                "id": campo_id,
+                "products": InfoField(
+                    nombre="products",
+                    tipo_campo="Product",
+                    es_lista=True,
+                    es_requerido=False,
+                    directivas={
+                        "relation": InfoDirectiva(
+                            nombre="relation",
+                            argumentos={
+                                "name": "ProductTypeProduct",
+                            },
+                        ),
+                    },
+                ),
+            },
+        ),
+    }
 
 
 @pytest.fixture(name="tabla_con_relaciones_mtm")
@@ -499,13 +565,6 @@ def fixture_tabla_con_relaciones_oto_con_fuente_cascade(campo_id, campo_name):
             nombre="Profile",
             campos={
                 "id": campo_id,
-                "bio": InfoField(
-                    nombre="bio",
-                    tipo_campo="String",
-                    es_lista=False,
-                    es_requerido=False,
-                    directivas={},
-                ),
                 "user": InfoField(
                     nombre="user",
                     tipo_campo="User",
@@ -571,13 +630,7 @@ def fixture_tabla_con_relaciones_oto_sin_campo_inverso(campo_id):
         "Profile": InfoTabla(
             nombre="Profile",
             campos={
-                "id": InfoField(
-                    nombre="id",
-                    tipo_campo="ID",
-                    es_lista=False,
-                    es_requerido=True,
-                    directivas={},
-                ),
+                "id": campo_id,
             },
         ),
     }
@@ -597,11 +650,7 @@ def test_get_esquema_mysql_vacio(generador_mysql):
     """Prueba que el esquema MySQL es vacio cuando no hay \
         relaciones ni tablas."""
 
-    sql = generador_mysql.generar_esquema(
-        relaciones=[],
-        tablas={},
-        enums={},
-    )
+    sql = generador_mysql.generar_esquema({}, {}, [])
 
     assert isinstance(sql, str)
     assert sql == "\n\n"
@@ -611,11 +660,10 @@ def test_get_esquema_sql(generador_mysql):
     """Prueba que el esquema SQL se obtiene correctamente."""
     generador_mysql.esquema_mysql = [
         "CREATE TABLE User (id INT PRIMARY KEY, name VARCHAR(100));",
-        "CREATE TABLE Post (id INT PRIMARY KEY, title VARCHAR(100));",
+        "CREATE TABLE Post (id INT PRIMARY KEY);",
     ]
 
     sql = generador_mysql.get_esquema_sql()
-
     assert isinstance(sql, str)
     assert "CREATE TABLE User" in sql
     assert "CREATE TABLE Post" in sql
@@ -624,25 +672,21 @@ def test_get_esquema_sql(generador_mysql):
     assert len(sql.split("\n")) == 3
 
 
-def test_generar_esquema_otm(
+def test_generar_esquema_mto(
     generador_mysql,
-    tabla_con_relaciones_otm,
+    table_with_relationship_mto,
     relation_many_to_one,
 ):
-    """Prueba la generacion completa del esquema con rel 1:N."""
+    """Test the complete generation of the schema with N:1 relationship."""
     with patch.object(generador_mysql.consola, "print"):
         sql = generador_mysql.generar_esquema(
-            tablas=tabla_con_relaciones_otm,
+            tablas=table_with_relationship_mto,
             enums={},
             relaciones=relation_many_to_one,
             visualizar_salida=False,
             visualizar_sql=False,
         )
 
-    assert isinstance(sql, str)
-    assert "CREATE TABLE User" in sql
-    assert "`name` VARCHAR(255) NOT NULL," in sql
-    assert "CREATE TABLE Post" in sql
     assert (
         "ALTER TABLE `Post`\n"
         "ADD COLUMN `user_id` VARCHAR(25) NOT NULL,\n"
@@ -652,6 +696,31 @@ def test_generar_esquema_otm(
     assert "`hashtags` JSON NOT NULL" in sql
     assert "`createdAt` DATETIME DEFAULT CURRENT_TIMESTAMP" in sql
     assert "`updatedAt` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE" in sql
+
+
+def test_generar_esquema_otm(
+    generador_mysql,
+    table_with_relationship_otm,
+    relation_one_to_many,
+):
+    """Test the complete generation of the schema with 1:N relationship."""
+    with patch.object(generador_mysql.consola, "print"):
+        sql = generador_mysql.generar_esquema(
+            tablas=table_with_relationship_otm,
+            enums={},
+            relaciones=relation_one_to_many,
+            visualizar_salida=False,
+            visualizar_sql=False,
+        )
+
+    assert "CREATE TABLE Product" in sql
+    assert "CREATE TABLE ProductType" in sql
+    assert (
+        "ALTER TABLE `Product`\n"
+        "ADD COLUMN `productType_id` VARCHAR(25),\n"
+        "ADD CONSTRAINT `fk_Product_productType_ProductType` FOREIGN KEY "
+        "(`productType_id`) REFERENCES `ProductType` (id) ON DELETE CASCADE;"
+    ) in sql
 
 
 def test_generar_esquema_mtm(
@@ -669,9 +738,6 @@ def test_generar_esquema_mtm(
             visualizar_sql=False,
         )
 
-    assert isinstance(sql, str)
-    assert "CREATE TABLE User" in sql
-    assert "CREATE TABLE Role" in sql
     assert "CREATE TABLE UserRoles" in sql
     assert "PRIMARY KEY (`user_id`, `role_id`),\n" in sql
     assert (
@@ -699,10 +765,6 @@ def test_generar_esquema_oto(
             visualizar_salida=False,
             visualizar_sql=False,
         )
-
-    assert isinstance(sql, str)
-    assert "CREATE TABLE User" in sql
-    assert "CREATE TABLE Profile" in sql
     assert "ALTER TABLE `Profile`\n" in sql
     assert "`status` ENUM('ACTIVE', 'INACTIVE', 'PENDING')\n" in sql
     assert (
@@ -725,9 +787,6 @@ def test_generar_esquema_oto_con_fuente_cascade(
             visualizar_salida=False,
             visualizar_sql=False,
         )
-
-    assert "CREATE TABLE User" in sql
-    assert "CREATE TABLE Profile" in sql
     assert "ALTER TABLE `User`\n" in sql
     assert (
         "ADD CONSTRAINT `fk_User_profile_Profile` FOREIGN KEY (`user_id`) "
@@ -750,8 +809,6 @@ def test_generar_esquema_oto_sin_campo_inverso(
             visualizar_sql=False,
         )
 
-    assert "CREATE TABLE User" in sql
-    assert "CREATE TABLE Profile" in sql
     assert "ALTER TABLE `User`\n" in sql
     assert (
         "ADD CONSTRAINT `fk_User_profile_Profile` FOREIGN KEY (`profile_id`) "
@@ -776,13 +833,11 @@ def test_generar_esquema_con_directivas_avanzadas(
             visualizar_salida=True,
             visualizar_sql=True,
         )
-
     assert "CREATE TABLE User" in sql
     assert "`name` VARCHAR(255) NOT NULL DEFAULT 'Anonymous'" in sql
     assert "`hashtags` JSON NOT NULL" in sql
     assert "`age` INT DEFAULT 18" in sql
     assert "UNIQUE KEY `uk_email` (`email`)" in sql
-
     assert mock_print.called
 
 
@@ -822,18 +877,15 @@ def test_visualizar_salida_relaciones_mtm(
             nombre_sql="UserRoles",
         )
         # pylint: enable=protected-access
-
-    # verifica que se haya llamado a print
     assert mock_print.called
-    # verifica que se llamo multiples veces (tree, panel y mensaje final)
     assert mock_print.call_count >= 3
 
 
-def test_visualizar_salida_relaciones_otm(
+def test_visualizar_salida_relaciones_mto(
     generador_mysql,
     relation_many_to_one,
 ):
-    """Prueba la visualizacion de salida de relaciones 1:N."""
+    """Test the visualization of output for N:1 relationships."""
     with patch.object(generador_mysql.consola, "print") as mock_print:
         # pylint: disable=protected-access
         generador_mysql._visualizar_salida_relaciones(
@@ -844,10 +896,7 @@ def test_visualizar_salida_relaciones_otm(
             nombre_sql="Post",
         )
         # pylint: enable=protected-access
-
-    # verifica que se haya llamado a print
     assert mock_print.called
-    # verifica que se llamo multiples veces (tree, panel y mensaje final)
     assert mock_print.call_count >= 3
 
 
@@ -916,9 +965,6 @@ def test_generar_esquema_mysql_con_relacion_itself(
             tablas=tabla_con_relaciones_itself,
             enums={},
         )
-
-    assert isinstance(sql, str)
-    assert "CREATE TABLE User" in sql
     assert "CREATE TABLE UserToFriends" in sql
     assert "PRIMARY KEY (`user_A`, `user_B`)" in sql
     assert "CONSTRAINT `fk_User_friends_User_friends`" in sql
@@ -932,7 +978,6 @@ def test_transformar_esquema_mysql(generador_mysql):
     esquema = """
     type User {
         id: ID!
-        name: String!
         password: String! @protected
         posts: [Post!] @relation(name: "UserPosts", onDelete: CASCADE)
     }

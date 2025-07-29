@@ -33,7 +33,7 @@ GraphQLStore CLI es una herramienta de línea de comandos profesional que automa
 - 🛡️ **Migraciones Seguras**: Evoluciona tu base de datos preservando la integridad de los datos
 - 🎨 **Visualización Amigable**: Interfaz amigable con Rich Console y syntax highlighting
 - ⚡ **Detección Inteligente**: Encuentra y procesa esquemas automáticamente
-- 🔗 **Relaciones Avanzadas**: Soporte completo para relaciones 1:1, 1:N y N:M
+- 🔗 **Relaciones Avanzadas**: Soporte completo para relaciones 1:1, N:1, 1:N y N:M
 - 📊 **Producción Ready**: 97% de cobertura de tests y arquitectura escalable
 
 ---
@@ -183,13 +183,13 @@ campo: [Tipo] @relation(name: "NombreRelacion", type: TIPO_RELACION, onDelete: A
 **Argumentos**:
 - `name`: Nombre único de la relación (requerido para toda relacion)
 - `type`: Tipo de relación física
-  - `INLINE`: Opcional para relaciones 1:1 y 1:N (clave foránea)
+  - `INLINE`: Opcional para relaciones 1:1, N:1 y 1:N (clave foránea)
   - `TABLA`: Requerido para relaciones N:M (tabla intermedia)
 - `onDelete`: Acción al eliminar registro padre
   - `CASCADE`: Eliminación en cascada (elimina registros hijos)
   - `SET_NULL`: Establece NULL en registros hijos (no elimina)
 
-**Ejemplos de relaciones 1:N con INLINE**:
+**Ejemplos de relaciones N:1 con INLINE**:
 ```graphql
 type User {
    id: ID! @id
@@ -204,7 +204,7 @@ type Post {
 }
 ```
 
-**SQL generado para 1:N**:
+**SQL generado para N:1**:
 ```sql
 -- Tabla User
 CREATE TABLE User (
@@ -219,6 +219,39 @@ CREATE TABLE Post (
    FOREIGN KEY (author_id) REFERENCES User(id) ON DELETE CASCADE
 );
 ```
+
+**Ejemplos de relaciones 1:N con INLINE**:
+```graphql
+type Product {
+   id: ID! @id
+   name: String!
+   productType: ProductType! @relation(name: "ProductTypeProducts", onDelete: CASCADE)
+}
+
+type ProductType {
+   id: ID! @id
+   name: String! @unique
+   products: [Product] @relation(name: "ProductTypeProducts", onDelete: CASCADE)
+}
+```
+
+**SQL generado para 1:N**:
+```sql
+-- Tabla ProductType
+CREATE TABLE ProductType (
+   id VARCHAR(25) NOT NULL PRIMARY KEY,
+   name VARCHAR(255) NOT NULL
+);
+
+-- Tabla Product con clave foránea
+CREATE TABLE Product (
+   id VARCHAR(25) NOT NULL PRIMARY KEY,
+   name VARCHAR(255) NOT NULL,
+   product_type_id VARCHAR(25) NOT NULL,
+   FOREIGN KEY (product_type_id) REFERENCES ProductType(id) ON DELETE CASCADE
+);
+```
+
 
 **Ejemplos de relaciones N:M con TABLA**:
 ```graphql
@@ -513,11 +546,11 @@ graphqlstore/
 | **Generador MySQL** | 237 | 5 | 94 | 11 | **95%** |
 | **Sistema Migraciones** | 396 | 17 | 208 | 23 | **93%** |
 | **Comandos CLI** | 271 | 11 | 52 | 3 | **100%** |
-| **🎯 TOTAL PROYECTO** | **3113** | **57** | **472** | **49** | **🏆 97%** |
+| **🎯 TOTAL PROYECTO** | **3151** | **62** | **482** | **53** | **🏆 97%** |
 
 ### ✅ Suite de Pruebas (TOTAL PROYECTO)
 
-- **📈 127 pruebas** ejecutándose en **5.00 segundos**
+- **📈 128 pruebas** ejecutándose en **4.54 segundos**
 - **🎯 97% cobertura global** con **0 fallos**
 - **🔍 Casos edge** y **integración completa**
 - **🚀 CI/CD automatizado** en GitHub Actions
