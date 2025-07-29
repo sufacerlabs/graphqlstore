@@ -84,9 +84,9 @@ def fixture_tablas_simples():
     }
 
 
-@pytest.fixture(name="relacion_many_to_one")
-def fixture_relacion_many_to_one():
-    """Fixture para una relación one-to-many."""
+@pytest.fixture(name="relation_many_to_one")
+def fixture_relation_many_to_one():
+    """Fixture for a relation many to one."""
     return {
         "User": InfoTabla(
             nombre="User",
@@ -158,6 +158,88 @@ def fixture_relacion_many_to_one():
                                 "onDelete": "CASCADE",
                             },
                         ),
+                    },
+                ),
+            },
+        ),
+    }
+
+
+@pytest.fixture(name="relation_one_to_many")
+def fixture_relation_one_to_many():
+    """Fixture for a relation one to many."""
+    return {
+        "Product": InfoTabla(
+            nombre="Product",
+            campos={
+                "id": InfoField(
+                    nombre="id",
+                    tipo_campo="ID",
+                    es_lista=False,
+                    es_requerido=True,
+                    directivas={
+                        "id": InfoDirectiva(
+                            nombre="id",
+                            argumentos={},
+                        ),
+                    },
+                ),
+                "name": InfoField(
+                    nombre="name",
+                    tipo_campo="String",
+                    es_lista=False,
+                    es_requerido=True,
+                    directivas={},
+                ),
+                "productType": InfoField(
+                    nombre="productType",
+                    tipo_campo="ProductType",
+                    es_lista=False,
+                    es_requerido=True,
+                    directivas={
+                        "relation": InfoDirectiva(
+                            nombre="relation",
+                            argumentos={
+                                "name": "ProductTypeProducts",
+                                "onDelete": "CASCADE",
+                            },
+                        )
+                    },
+                ),
+            },
+        ),
+        "ProductType": InfoTabla(
+            nombre="ProductType",
+            campos={
+                "id": InfoField(
+                    nombre="id",
+                    tipo_campo="ID",
+                    es_lista=False,
+                    es_requerido=True,
+                    directivas={
+                        "id": InfoDirectiva(
+                            nombre="id",
+                            argumentos={},
+                        ),
+                    },
+                ),
+                "name": InfoField(
+                    nombre="name",
+                    tipo_campo="String",
+                    es_lista=False,
+                    es_requerido=True,
+                    directivas={},
+                ),
+                "products": InfoField(
+                    nombre="products",
+                    tipo_campo="Product",
+                    es_lista=True,
+                    es_requerido=True,
+                    directivas={
+                        "relation": InfoDirectiva(
+                            nombre="relation",
+                            argumentos={"name": "ProductTypeProducts"},
+                        )
                     },
                 ),
             },
@@ -485,15 +567,29 @@ def fixture_proceso_con_tablas_simples(
     )
 
 
-@pytest.fixture(name="proceso_con_relacion_many_to_one")
-def fixture_proceso_con_relacion_many_to_one(
-    relacion_many_to_one,
+@pytest.fixture(name="process_with_relation_many_to_one")
+def fixture_process_with_relation_many_to_one(
+    relation_many_to_one,
     tipos_escalares,
     tipos_enumerados,
 ):
-    """Fixture que proporciona un procesador con una relación one-to-many"""
+    """Fixture that provides a processor for a relation one-to-many"""
     return ProcesarRelaciones(
-        tablas=relacion_many_to_one,
+        tablas=relation_many_to_one,
+        scalar_types=tipos_escalares,
+        enum_types=tipos_enumerados,
+    )
+
+
+@pytest.fixture(name="process_with_relation_one_to_many")
+def fixture_process_with_relation_one_to_many(
+    relation_one_to_many,
+    tipos_escalares,
+    tipos_enumerados,
+):
+    """Fixture that provides a processor for a relation one-to-many"""
+    return ProcesarRelaciones(
+        tablas=relation_one_to_many,
         scalar_types=tipos_escalares,
         enum_types=tipos_enumerados,
     )
@@ -654,11 +750,11 @@ def test_validar_relacion_many_to_many_con_link_erroneo(
     assert "debe usarse tipo de link TABLE." in str(ex_inf.value)
 
 
-def test_procesar_relacion_many_to_one(
-    proceso_con_relacion_many_to_one,
+def test_process_relation_many_to_one(
+    process_with_relation_many_to_one,
 ):
-    """Prueba procesar una relación one-to-many"""
-    relaciones = proceso_con_relacion_many_to_one.procesar_relaciones()
+    """Test process a relation many to one"""
+    relaciones = process_with_relation_many_to_one.procesar_relaciones()
 
     assert len(relaciones) == 1
     rela = relaciones[0]
@@ -680,6 +776,35 @@ def test_procesar_relacion_many_to_one(
     assert rela.objetivo.tabla_objetivo == "Post"
     assert rela.objetivo.campo_inverso == "author"
     assert rela.objetivo.on_delete_inverso == "CASCADE"
+    assert rela.objetivo.nombre_constraint_objetivo is None
+
+
+def test_process_relation_one_to_many(
+    process_with_relation_one_to_many,
+):
+    """Test process a relation one to many"""
+    relations = process_with_relation_one_to_many.procesar_relaciones()
+
+    assert len(relations) == 1
+    rela = relations[0]
+
+    # verify relation information
+    assert isinstance(rela, InfoRelacion)
+    assert rela.nombre_relacion == "ProductTypeProducts"
+    assert rela.tipo_relation == TipoRelacion.ONE_TO_MANY.value
+    assert rela.tipo_link == TipoLink.INLINE.value
+
+    # verify source information
+    assert rela.fuente.tabla_fuente == "Product"
+    assert rela.fuente.campo_fuente == "productType"
+    assert not rela.fuente.fuente_es_lista
+    assert rela.fuente.on_delete == "CASCADE"
+    constraint_name = "fk_Product_productType_ProductType_products"
+    assert rela.fuente.nombre_constraint_fuente == constraint_name
+
+    # verify target information
+    assert rela.objetivo.tabla_objetivo == "ProductType"
+    assert rela.objetivo.campo_inverso == "products"
     assert rela.objetivo.nombre_constraint_objetivo is None
 
 

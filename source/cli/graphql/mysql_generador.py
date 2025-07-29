@@ -158,8 +158,8 @@ class GeneradorEsquemaMySQL:
 
             tablas_juntion_procesados.add(nombre_junction)
 
-            t_fuente = tabla_fuente.lower()
-            t_objetivo = tabla_objetivo.lower()
+            t_fuente = tabla_fuente[0].lower() + tabla_fuente[1:]
+            t_objetivo = tabla_objetivo[0].lower() + tabla_objetivo[1:]
 
             es_relacion_self = tabla_fuente == tabla_objetivo
 
@@ -241,6 +241,7 @@ class GeneradorEsquemaMySQL:
             in [
                 TipoRelacion.ONE_TO_ONE.value,
                 TipoRelacion.MANY_TO_ONE.value,
+                TipoRelacion.ONE_TO_MANY.value,
             ]
             and tipo_link == TipoLink.INLINE.value
         ):
@@ -254,16 +255,16 @@ class GeneradorEsquemaMySQL:
                 # foranea va en la tabla objetivo
                 tabla_fk = tabla_objetivo
                 tabla_ref = tabla_fuente
-                campo_fk = tabla_fuente.lower()
+                campo_fk = tabla_fuente[0].lower() + tabla_fuente[1:]
                 actual_on_delete = on_delete_inverso
 
-            # elif tipo_relacion == TipoRelacion.MANY_TO_ONE.value:
-            #     # if the source has Target but the target has
-            #     # [Source] then the foreign key goes in the source table
-            #     tabla_fk = tabla_fuente
-            #     tabla_ref = tabla_objetivo
-            #     campo_fk = tabla_objetivo.lower()
-            #     actual_on_delete = on_delete
+            elif tipo_relacion == TipoRelacion.ONE_TO_MANY.value:
+                # if the source has Target but the target has
+                # [Source] then the foreign key goes in the source table
+                tabla_fk = tabla_fuente
+                tabla_ref = tabla_objetivo
+                campo_fk = tabla_objetivo[0].lower() + tabla_objetivo[1:]
+                actual_on_delete = on_delete
 
             elif tipo_relacion == TipoRelacion.ONE_TO_ONE.value:
                 # si es una relacion 1:1, la clave foranea va en el lado
@@ -275,7 +276,7 @@ class GeneradorEsquemaMySQL:
                     # la fuente tiene CASCADE, target no
                     tabla_fk = tabla_fuente
                     tabla_ref = tabla_objetivo
-                    campo_fk = tabla_fuente.lower()
+                    campo_fk = tabla_fuente[0].lower() + tabla_fuente[1:]
                     actual_on_delete = on_delete
 
                     if not relacion.objetivo.campo_inverso:
@@ -513,11 +514,22 @@ class GeneradorEsquemaMySQL:
                     f"[bold magenta]{objetivo}[/bold magenta]"
                 )
                 titulo_sql = f"SQL para la tabla junction {nombre_sql}"
-            else:
+            elif relacion.tipo_relation in [
+                TipoRelacion.ONE_TO_ONE.value,
+                TipoRelacion.MANY_TO_ONE.value,
+            ]:
                 msg_relacion = (
                     f"[bold magenta]{fuente}[/bold magenta] agregar a "
                     f"[bold magenta]{objetivo}[/bold magenta] "
                 )
+                titulo_sql = f"SQL para la relacion en {nombre_sql}"
+
+            else:  # one to many
+                msg_relacion = (
+                    f"[bold magenta]{objetivo}[/bold magenta] agregar a "
+                    f"[bold magenta]{fuente}[/bold magenta] "
+                )
+
                 titulo_sql = f"SQL para la relacion en {nombre_sql}"
 
             tree = Tree(

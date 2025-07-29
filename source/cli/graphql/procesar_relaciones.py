@@ -241,10 +241,16 @@ class ProcesarRelaciones:
             tipo_relacion = TipoRelacion.MANY_TO_MANY.value
         elif (
             info_campo.es_lista
-            or campo_inverso
-            and self.tablas[tabla_objetivo].campos[campo_inverso].es_lista
+            and campo_inverso
+            and not self.tablas[tabla_objetivo].campos[campo_inverso].es_lista
         ):
             tipo_relacion = TipoRelacion.MANY_TO_ONE.value
+        elif (
+            not info_campo.es_lista
+            and campo_inverso
+            and self.tablas[tabla_objetivo].campos[campo_inverso].es_lista
+        ):
+            tipo_relacion = TipoRelacion.ONE_TO_MANY.value
 
         return tipo_relacion
 

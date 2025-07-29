@@ -775,7 +775,10 @@ class GeneradorMigracionMySQL:
 
     def _determinar_tabla_fk(self, relacion: InfoRelacion) -> str:
         """Determinar en qué tabla va la foreign key."""
-        if relacion.tipo_relation == TipoRelacion.MANY_TO_ONE.value:
+        if relacion.tipo_relation in [
+            TipoRelacion.MANY_TO_ONE.value,
+            TipoRelacion.ONE_TO_MANY.value,
+        ]:
             return (
                 relacion.objetivo.tabla_objetivo
                 if relacion.fuente.fuente_es_lista
@@ -793,9 +796,14 @@ class GeneradorMigracionMySQL:
     def _determinar_campo_fk(self, relacion: InfoRelacion) -> str:
         """Determinar nombre del campo foreign key."""
         campo_fk = relacion.fuente.campo_fuente
-        if relacion.tipo_relation == TipoRelacion.MANY_TO_ONE.value:
+        source_table = relacion.fuente.tabla_fuente
+
+        if relacion.tipo_relation in [
+            TipoRelacion.MANY_TO_ONE.value,
+            TipoRelacion.ONE_TO_MANY.value,
+        ]:
             campo_fk = (
-                relacion.fuente.tabla_fuente.lower()
+                source_table[0].lower() + source_table[1:]
                 if relacion.fuente.fuente_es_lista
                 else relacion.fuente.campo_fuente
             )
@@ -806,7 +814,7 @@ class GeneradorMigracionMySQL:
                 campo_fk = (
                     relacion.fuente.campo_fuente
                     if not relacion.objetivo.campo_inverso
-                    else relacion.fuente.tabla_fuente.lower()
+                    else source_table[0].lower() + source_table[1:]
                 )
             elif relacion.fuente.on_delete != OnDelete.CASCADE.value and (
                 relacion.objetivo.on_delete_inverso == OnDelete.CASCADE.value
@@ -875,6 +883,8 @@ class GeneradorMigracionMySQL:
         actual_on_delete = "SET NULL"
         if relacion.tipo_relation == TipoRelacion.MANY_TO_ONE.value:
             actual_on_delete = relacion.objetivo.on_delete_inverso
+        elif relacion.tipo_relation == TipoRelacion.ONE_TO_MANY.value:
+            actual_on_delete = relacion.fuente.on_delete
         else:
             if relacion.fuente.on_delete == OnDelete.CASCADE.value and (
                 relacion.objetivo.on_delete_inverso != OnDelete.CASCADE.value
