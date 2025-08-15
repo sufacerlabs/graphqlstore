@@ -10,8 +10,8 @@ from .exceptions import (
 )
 from .parser import ParserGraphQLEsquema
 from .procesar_relaciones import ProcesarRelaciones
-from .mysql_generador import GeneradorEsquemaMySQL
 from .mysql_migracion import GeneradorMigracionMySQL
+from .transform_schema_graphql import transform_schema_graphql
 
 __all__ = [
     "GraphQLStoreError",
@@ -22,6 +22,6 @@ __all__ = [
     "MigrationGenerationError",
     "ParserGraphQLEsquema",
     "ProcesarRelaciones",
-    "GeneradorEsquemaMySQL",
     "GeneradorMigracionMySQL",
+    "transform_schema_graphql",
 ]

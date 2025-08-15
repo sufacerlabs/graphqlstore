@@ -5,8 +5,6 @@ from unittest.mock import Mock, patch
 import pytest
 from source.cli.migracion.main import migracion
 from source.cli.database.adaptadores.mysql import AdaptadorMySQL
-from source.cli.loaders.conf_json_loader import ConfiguracionJsonLoader
-from source.cli.graphql.mysql_generador import GeneradorEsquemaMySQL
 from source.cli.graphql.mysql_migracion import GeneradorMigracionMySQL
 from source.cli.graphql.configuracion_y_constantes import (
     InfoMigracion,
@@ -76,26 +74,6 @@ def fixture_esquema_nuevo():
     """
 
 
-@pytest.fixture(name="config_valida")
-def fixture_config_valida():
-    """Fixture que proporciona una configuración válida de BD."""
-    return {
-        "DB_HOST": "localhost",
-        "DB_PUERTO": "3306",
-        "DB_USUARIO": "testuser",
-        "DB_PASSWORD": "testpass",
-        "DB_NOMBRE": "testdb",
-    }
-
-
-@pytest.fixture(name="mock_loader")
-def fixture_config_json_loader(config_valida):
-    """Fixture que proporciona un ConfiguracionJsonLoader simulado."""
-    loader = Mock(spec=ConfiguracionJsonLoader)
-    loader.cargar_configuracion.return_value = config_valida
-    return loader
-
-
 @pytest.fixture(name="mock_adaptador")
 def fixture_adaptador_mysql():
     """Fixture que proporciona un adaptador MySQL simulado."""
@@ -142,8 +120,7 @@ def fixture_generador_migracion():
 
 @pytest.fixture(name="mock_generador_esquema")
 def fixture_generador_esquema():
-    """Fixture que proporciona un GeneradorEsquemaMySQL simulado."""
-    generador = Mock(spec=GeneradorEsquemaMySQL)
+    """Fixture que proporciona un transform_schema_graphql simulado."""
     esquema_cliente = """
     type User {
         id: ID!
@@ -160,8 +137,9 @@ def fixture_generador_esquema():
         author: User
     }
     """
-    generador.transformar_esquema_graphql.return_value = esquema_cliente
-    return generador
+    transform_schema = Mock()
+    transform_schema.return_value = esquema_cliente
+    return transform_schema
 
 
 @pytest.fixture(name="ruta_proyecto")
@@ -207,8 +185,8 @@ def test_migracion_con_esquema_especificado_exitoso(
             return_value=mock_generador_migracion,
         ),
         patch(
-            "source.cli.migracion.main.GeneradorEsquemaMySQL",
-            return_value=mock_generador_esquema,
+            "source.cli.migracion.main.transform_schema_graphql",
+            mock_generador_esquema,
         ),
         patch("source.cli.migracion.main.Console"),
     ):
@@ -242,8 +220,7 @@ def test_migracion_con_esquema_especificado_exitoso(
         GestorArchivo.asegurar_dir_existe.assert_called()
 
         # verificar que se actualizó el esquema cliente
-        ss = mock_generador_esquema.transformar_esquema_graphql
-        ss.assert_called_once_with(
+        mock_generador_esquema.assert_called_once_with(
             esquema_nuevo,
         )
 
@@ -326,7 +303,7 @@ def test_migracion_sin_esquema_encuentra_archivo_graphql(
             return_value=mock_generador_migracion,
         ),
         patch(
-            "source.cli.migracion.main.GeneradorEsquemaMySQL",
+            "source.cli.migracion.main.transform_schema_graphql",
             return_value=mock_generador_esquema,
         ),
         patch("source.cli.migracion.main.Console"),
@@ -546,8 +523,8 @@ def test_migracion_flujo_completo_integracion(
             return_value=mock_generador_migracion,
         ),
         patch(
-            "source.cli.migracion.main.GeneradorEsquemaMySQL",
-            return_value=mock_generador_esquema,
+            "source.cli.migracion.main.transform_schema_graphql",
+            mock_generador_esquema,
         ),
         patch("source.cli.migracion.main.Console") as mock_console,
     ):
@@ -577,7 +554,7 @@ def test_migracion_flujo_completo_integracion(
         assert GestorArchivo.escribir_archivo.call_count == 3
 
         # esquema cliente actualizado
-        mock_generador_esquema.transformar_esquema_graphql.assert_called_once()
+        mock_generador_esquema.assert_called_once()
 
         # mostrar mensajes de exito
         mock_consola_instancia = mock_console.return_value
@@ -621,6 +598,10 @@ def test_migracion_validacion_parametros_entrada(
         patch(
             "source.cli.migracion.main.GeneradorMigracionMySQL",
             return_value=mock_generador_migracion,
+        ),
+        patch(
+            "source.cli.migracion.main.transform_schema_graphql",
+            return_value="",
         ),
         patch("source.cli.migracion.main.Console"),
     ):

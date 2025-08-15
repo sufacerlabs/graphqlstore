@@ -6,6 +6,13 @@ from enum import Enum
 from typing import Any, Dict, List, Optional
 
 
+class DatabaseType(Enum):
+    """Enum for supported database types."""
+
+    MYSQL = "mysql"
+    POSTGRESQL = "postgresql"
+
+
 class TipoField(Enum):
     """Enumeración para los tipos de campos soportados."""
 
@@ -43,7 +50,7 @@ class OnDelete(Enum):
     """Enumeración para las acciones de eliminación soportadas."""
 
     CASCADE = "CASCADE"
-    SET_NULL = "SET_NULL"
+    SET_NULL = "SET NULL"
 
 
 @dataclass

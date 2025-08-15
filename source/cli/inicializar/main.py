@@ -10,8 +10,9 @@ from ..utilidades import GestorArchivo
 from ..graphql import (
     ParserGraphQLEsquema,
     ProcesarRelaciones,
-    GeneradorEsquemaMySQL,
+    transform_schema_graphql,
 )
+from ..generators.generator_db_schema import GeneratorDBSchema
 from ..graphql.exceptions import (
     GraphQLStoreError,
     SchemaError,
@@ -109,15 +110,14 @@ def inicializar(args):
             enum_types=informacion_parseada.enums,
         )
         relaciones = procesar_relaciones.procesar_relaciones()
-        generador_esquema_mysql = GeneradorEsquemaMySQL()
-        sql = generador_esquema_mysql.generar_esquema(
-            tablas=informacion_parseada.tablas,
+        generador_esquema_mysql = GeneratorDBSchema()
+        sql = generador_esquema_mysql.generate_schema(
+            tables=informacion_parseada.tablas,
             enums=informacion_parseada.enums,
-            relaciones=relaciones,
-            visualizar_salida=not args.no_visualizar_salida,
-            visualizar_sql=not args.no_visualizar_sql,
+            relationships=relaciones,
+            print_output=not args.no_visualizar_salida,
+            print_sql=not args.no_visualizar_sql,
         )
-
         adaptador.ejecutar_consulta(sql)
         adaptador.cerrar_conexion()
 
@@ -135,9 +135,7 @@ def inicializar(args):
         GestorArchivo.escribir_archivo(sql, archivo_mysql)
 
         # transformar esquema graphql
-        graphql_esquema = generador_esquema_mysql.transformar_esquema_graphql(
-            esquema_contenido
-        )
+        graphql_esquema = transform_schema_graphql(esquema_contenido)
         archivo_salida = Path(salida_dir) / "schema.graphql"
         GestorArchivo.escribir_archivo(graphql_esquema, archivo_salida)
     except ValueError as e:

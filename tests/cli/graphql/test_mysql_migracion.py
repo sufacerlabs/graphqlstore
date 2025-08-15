@@ -628,7 +628,7 @@ def test_diff_esquemas_relaciones_con_diferentes_on_delete(
     assert len(diferencias.relaciones.agregadas) == 1
 
     relacion = diferencias.relaciones.agregadas[0]
-    assert relacion.fuente.on_delete == OnDelete.SET_NULL.value
+    assert relacion.fuente.on_delete == OnDelete.SET_NULL.name
     assert relacion.objetivo.on_delete_inverso == OnDelete.CASCADE.value
 
 

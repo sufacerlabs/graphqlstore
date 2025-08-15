@@ -3,13 +3,12 @@
 from pathlib import Path
 from unittest.mock import Mock, patch
 import pytest
+from source.cli.generators.generator_db_schema import GeneratorDBSchema
 from source.cli.inicializar.main import inicializar
 from source.cli.database.adaptadores.mysql import AdaptadorMySQL
-from source.cli.loaders.conf_json_loader import ConfiguracionJsonLoader
 from source.cli.graphql import (
     ParserGraphQLEsquema,
     ProcesarRelaciones,
-    GeneradorEsquemaMySQL,
 )
 
 
@@ -48,26 +47,6 @@ def fixture_esquema_contenido():
     """
 
 
-@pytest.fixture(name="config_valida")
-def fixture_config_valida():
-    """Fixture que proporciona una configuración válida de BD."""
-    return {
-        "DB_HOST": "localhost",
-        "DB_PUERTO": "3306",
-        "DB_USUARIO": "testuser",
-        "DB_PASSWORD": "testpass",
-        "DB_NOMBRE": "testdb",
-    }
-
-
-@pytest.fixture(name="mock_loader")
-def fixture_config_json_loader(config_valida):
-    """Fixture que proporciona un ConfiguracionJsonLoader simulado."""
-    loader = Mock(spec=ConfiguracionJsonLoader)
-    loader.cargar_configuracion.return_value = config_valida
-    return loader
-
-
 @pytest.fixture(name="mock_adaptador")
 def fixture_adaptador_mysql():
     """Fixture que proporciona un adaptador MySQL simulado."""
@@ -102,10 +81,8 @@ def fixture_procesar_relaciones():
 @pytest.fixture(name="mock_generador")
 def fixture_generador_mysql():
     """Fixture que proporciona un generador de esquema MySQL simulado."""
-    generador = Mock(spec=GeneradorEsquemaMySQL)
-    generador.generar_esquema.return_value = "CREATE TABLE test (id INT);"
-    fake = "Type User {\n  id: ID!\n}\n"
-    generador.transformar_esquema_graphql.return_value = fake
+    generador = Mock(spec=GeneratorDBSchema)
+    generador.generate_schema.return_value = "CREATE TABLE test (id INT);"
     return generador
 
 
@@ -115,7 +92,6 @@ def fixture_ruta_proyecto():
     return Path("/proyecto/test")
 
 
-# pylint: disable=too-many-arguments, too-many-positional-arguments
 def test_inicializar_con_esquema_especificado_exitoso(
     mock_args,
     esquema_contenido,
@@ -162,7 +138,7 @@ def test_inicializar_con_esquema_especificado_exitoso(
             return_value=mock_procesar_relaciones,
         ),
         patch(
-            "source.cli.inicializar.main.GeneradorEsquemaMySQL",
+            "source.cli.inicializar.main.GeneratorDBSchema",
             return_value=mock_generador,
         ),
         patch(
@@ -188,7 +164,7 @@ def test_inicializar_con_esquema_especificado_exitoso(
         mock_procesar_relaciones.procesar_relaciones.assert_called_once()
 
         # verificar que se genero el esquema MySQL
-        mock_generador.generar_esquema.assert_called_once()
+        mock_generador.generate_schema.assert_called_once()
 
         # verificar conexion a la base de datos
         mock_loader.cargar_configuracion.assert_called_once()
@@ -197,10 +173,6 @@ def test_inicializar_con_esquema_especificado_exitoso(
         mock_adaptador.cerrar_conexion.assert_called_once()
 
 
-# pylint: enable=too-many-arguments, too-many-positional-arguments
-
-
-# pylint: disable=too-many-arguments, too-many-positional-arguments
 def test_inicializar_sin_esquema_encuentra_archivo_graphql(
     mock_args_sin_esquema,
     esquema_contenido,
@@ -249,7 +221,7 @@ def test_inicializar_sin_esquema_encuentra_archivo_graphql(
             return_value=mock_procesar_relaciones,
         ),
         patch(
-            "source.cli.inicializar.main.GeneradorEsquemaMySQL",
+            "source.cli.inicializar.main.GeneratorDBSchema",
             return_value=mock_generador,
         ),
         patch(
@@ -267,9 +239,6 @@ def test_inicializar_sin_esquema_encuentra_archivo_graphql(
 
         # verificar que se parceo el esquema
         mock_parser.parse_esquema.assert_called_once_with(esquema_contenido)
-
-
-# pylint: enable=too-many-arguments, too-many-positional-arguments
 
 
 def test_inicializar_falla_sin_esquema_y_sin_archivo_graphql(
@@ -338,7 +307,6 @@ def test_inicializar_falla_esquema_no_existe(
         )
 
 
-# pylint: disable=too-many-arguments, too-many-positional-arguments
 def test_inicializar_sin_configuracion_db(
     mock_args,
     esquema_contenido,
@@ -382,7 +350,7 @@ def test_inicializar_sin_configuracion_db(
             return_value=mock_procesar_relaciones,
         ),
         patch(
-            "source.cli.inicializar.main.GeneradorEsquemaMySQL",
+            "source.cli.inicializar.main.GeneratorDBSchema",
             return_value=mock_generador,
         ),
         patch("source.cli.inicializar.main.Console") as mock_console,
@@ -396,10 +364,6 @@ def test_inicializar_sin_configuracion_db(
         assert mock_console.return_value.print.call_count == 3
 
 
-# pylint: enable=too-many-arguments, too-many-positional-arguments
-
-
-# pylint: disable=too-many-arguments, too-many-positional-arguments
 def test_inicializar_db_con_tablas_existentes(
     mock_args,
     esquema_contenido,
@@ -449,7 +413,7 @@ def test_inicializar_db_con_tablas_existentes(
             return_value=mock_procesar_relaciones,
         ),
         patch(
-            "source.cli.inicializar.main.GeneradorEsquemaMySQL",
+            "source.cli.inicializar.main.GeneratorDBSchema",
             return_value=mock_generador,
         ),
         patch("source.cli.inicializar.main.Console") as mock_console,
@@ -462,9 +426,6 @@ def test_inicializar_db_con_tablas_existentes(
         mock_consola_instancia = mock_console.return_value
         llamadas = mock_consola_instancia.print.call_args_list
         assert any("migracion" in str(call) for call in llamadas)
-
-
-# pylint: enable=too-many-arguments, too-many-positional-arguments
 
 
 def test_ini_multi_archivos_gql_sin_esquema_especificado(

@@ -38,6 +38,7 @@ from .templates import (
 from .exceptions import (
     GraphQLStoreError,
     MigrationError,
+    RelationshipError,
     SchemaComparisonError,
     MigrationGenerationError,
 )
@@ -77,7 +78,6 @@ class GeneradorMigracionMySQL:
         :param visualizar_sql: Si mostrar SQL generado
         :return: Informacion completa de la migracion
         """
-        # pylint: disable=too-many-arguments,too-many-positional-arguments
         self.visualizar_salida = visualizar_salida
         self.visualizar_sql = visualizar_sql
 
@@ -135,10 +135,7 @@ class GeneradorMigracionMySQL:
             return migracion
 
         except GraphQLStoreError as e:
-            raise MigrationError(
-                f"Error generando migracion: {str(e)}",
-            ) from e
-        # pylint: enable=too-many-arguments,too-many-positional-arguments
+            raise MigrationError(f"Error generando migracion: {str(e)}") from e
 
     def diff_esquemas(
         self, esquema_anterior: str, esquema_nuevo: str
@@ -218,7 +215,6 @@ class GeneradorMigracionMySQL:
         :param diferencias: Diferencias entre esquemas
         :return: SQL de migracion completo
         """
-        # pylint: disable=too-many-branches,too-many-locals
         try:
             sentencias_sql = []
 
@@ -293,7 +289,6 @@ class GeneradorMigracionMySQL:
             raise MigrationGenerationError(
                 f"Error generando SQL: {str(e)}",
             ) from e
-        # pylint: enable=too-many-branches,too-many-locals
 
     def _comparar_tablas(
         self,
@@ -838,12 +833,12 @@ class GeneradorMigracionMySQL:
 
         on_delete = (
             OnDelete.SET_NULL.value
-            if (relacion.fuente.on_delete == "SET_NULL")
+            if (relacion.fuente.on_delete == "SET NULL")
             else OnDelete.CASCADE.value
         )
         reverse_on_delete = (
             OnDelete.SET_NULL.value
-            if (relacion.objetivo.on_delete_inverso == "SET_NULL")
+            if (relacion.objetivo.on_delete_inverso == "SET NULL")
             else OnDelete.CASCADE.value
         )
 
@@ -878,14 +873,12 @@ class GeneradorMigracionMySQL:
             else relacion.fuente.tabla_fuente
         )
 
-        # determinar ON DELETE
-
         actual_on_delete = "SET NULL"
         if relacion.tipo_relation == TipoRelacion.MANY_TO_ONE.value:
             actual_on_delete = relacion.objetivo.on_delete_inverso
         elif relacion.tipo_relation == TipoRelacion.ONE_TO_MANY.value:
             actual_on_delete = relacion.fuente.on_delete
-        else:
+        elif relacion.tipo_relation == TipoRelacion.ONE_TO_ONE.value:
             if relacion.fuente.on_delete == OnDelete.CASCADE.value and (
                 relacion.objetivo.on_delete_inverso != OnDelete.CASCADE.value
             ):
@@ -894,13 +887,17 @@ class GeneradorMigracionMySQL:
                 relacion.objetivo.on_delete_inverso == OnDelete.CASCADE.value
             ):
                 actual_on_delete = relacion.objetivo.on_delete_inverso
+        else:
+            raise RelationshipError(
+                f"Relationship type not supported: {relacion.tipo_relation}",
+                f"for {relacion.nombre_relacion}",
+            )
 
         if actual_on_delete == OnDelete.CASCADE.value:
             accion_on_delete = "ON DELETE CASCADE"
         else:
             accion_on_delete = "ON DELETE SET NULL"
 
-        # determinar si es UNIQUE (para relaciones 1:1)
         rt = relacion.tipo_relation
         unique = " UNIQUE" if rt == TipoRelacion.ONE_TO_ONE.value else ""
         sql = template_modificar_fk(

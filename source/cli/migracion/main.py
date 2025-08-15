@@ -14,12 +14,13 @@ from ..graphql.exceptions import (
     MigrationGenerationError,
 )
 
-from ..graphql.mysql_generador import GeneradorEsquemaMySQL
-
 from ..loaders.conf_json_loader import ConfiguracionJsonLoader
 
 from ..utilidades.gestor_archivo import GestorArchivo
-from ..graphql.mysql_migracion import GeneradorMigracionMySQL
+from ..graphql import (
+    GeneradorMigracionMySQL,
+    transform_schema_graphql,
+)
 
 
 def migracion(args):
@@ -141,8 +142,7 @@ def migracion(args):
         )
 
         # actualizar el esquema cliente graphql
-        generador = GeneradorEsquemaMySQL()
-        esquema_cliente = generador.transformar_esquema_graphql(
+        esquema_cliente = transform_schema_graphql(
             esquema_nuevo,
         )
         GestorArchivo.escribir_archivo(
