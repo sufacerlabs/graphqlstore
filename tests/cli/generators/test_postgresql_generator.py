@@ -46,6 +46,12 @@ def test_engine_specific_settings(generator_postgres):
     assert generator_postgres.get_engine_specific_settings() == ""
 
 
+def test_primary_key_column(generator_postgres):
+    """Test that the primary key column is generated correctly."""
+    primary_key = generator_postgres.get_primary_key_column()
+    assert primary_key == "id VARCHAR(25) NOT NULL PRIMARY KEY"
+
+
 def test_get_schema_sql(generator_postgres):
     """Test that the schema SQL is returned correctly."""
     generator_postgres.schema_sql = [
@@ -71,7 +77,7 @@ def test_enum_type_generation(generator_postgres, basic_enums):
             print_sql=False,
         )
 
-    assert "CREATE TYPE userstatus_type AS ENUM ('ACTIVE', 'INACTIVE');" in sql
+    assert "CREATE TYPE UserStatus_enum AS ENUM('ACTIVE'," in sql
 
 
 def test_generate_schema_with_advanced_directives(
@@ -89,8 +95,8 @@ def test_generate_schema_with_advanced_directives(
             print_sql=True,
         )
 
-    assert "CREATE TYPE userstatus_type AS ENUM" in sql
-    assert "CREATE TABLE User" in sql
+    assert "CREATE TYPE UserStatus_enum AS ENUM" in sql
+    assert 'CREATE TABLE "User"' in sql
     assert "name VARCHAR(255) NOT NULL DEFAULT 'Anonymous'" in sql
     assert "hashtags JSONB NOT NULL" in sql
     assert "age INTEGER DEFAULT 18" in sql
@@ -113,11 +119,11 @@ def test_generate_schema_many_to_many(
             print_sql=False,
         )
 
-    assert "CREATE TABLE UserRoles" in sql
-    assert "PRIMARY KEY (`user_id`, `role_id`)" in sql
-    assert "CONSTRAINT `fk_User_roles_Role` FOREIGN KEY" in sql
+    assert 'CREATE TABLE "UserRoles"' in sql
+    assert "PRIMARY KEY (user_id, role_id)" in sql
+    assert "CONSTRAINT fk_User_roles_Role FOREIGN KEY" in sql
     assert "ON DELETE SET NULL" in sql
-    assert "CONSTRAINT `fk_Role_users_User` FOREIGN KEY" in sql
+    assert "CONSTRAINT fk_Role_users_User FOREIGN KEY" in sql
 
 
 def test_generate_schema_many_to_one(
@@ -135,11 +141,11 @@ def test_generate_schema_many_to_one(
             print_sql=False,
         )
 
-    assert "ALTER TABLE `Post`" in sql
-    assert "ADD COLUMN `user_id` VARCHAR(25)" in sql
+    assert 'ALTER TABLE "Post"' in sql
+    assert "ADD COLUMN user_id VARCHAR(25)" in sql
     assert (
-        "ADD CONSTRAINT `fk_User_posts_Post` FOREIGN KEY (`user_id`) "
-        "REFERENCES `User`(id) ON DELETE CASCADE"
+        "ADD CONSTRAINT fk_User_posts_Post FOREIGN KEY (user_id) "
+        'REFERENCES "User"(id) ON DELETE CASCADE'
     ) in sql
 
 
@@ -217,10 +223,10 @@ def test_one_to_one_with_source_cascade(
         )
 
     # In PostgreSQL with CASCADE on source, the source table gets the FK
-    assert "ALTER TABLE `User`" in sql
+    assert 'ALTER TABLE "User"' in sql
     assert (
-        "ADD CONSTRAINT `fk_User_profile_Profile` FOREIGN KEY (`user_id`) "
-        "REFERENCES `Profile`(id) ON DELETE CASCADE;"
+        "ADD CONSTRAINT fk_User_profile_Profile FOREIGN KEY (user_id) "
+        'REFERENCES "Profile"(id) ON DELETE CASCADE;'
     ) in sql
 
 
@@ -241,12 +247,12 @@ def test_generate_schema_with_self_relation(
             tables=table_with_self_relations,
             enums={},
         )
-    assert "CREATE TABLE UserToFriends" in sql
-    assert "PRIMARY KEY (`user_A`, `user_B`)" in sql
-    assert "CONSTRAINT `fk_User_friends_User_friends`" in sql
-    assert "Y (`user_A`) REFERENCES `User`(id) ON DELETE CASCADE" in sql
-    assert "CONSTRAINT `fk_User_friends_User`" in sql
-    assert "Y (`user_B`) REFERENCES `User`(id) ON DELETE CASCADE" in sql
+    assert 'CREATE TABLE "UserToFriends"' in sql
+    assert "PRIMARY KEY (user_A, user_B)" in sql
+    assert "CONSTRAINT fk_User_friends_User_friends" in sql
+    assert 'Y (user_A) REFERENCES "User"(id) ON DELETE CASCADE' in sql
+    assert "CONSTRAINT fk_User_friends_User" in sql
+    assert 'Y (user_B) REFERENCES "User"(id) ON DELETE CASCADE' in sql
 
 
 def test_generar_esquema_otm(
@@ -264,13 +270,13 @@ def test_generar_esquema_otm(
             print_sql=False,
         )
 
-    assert "CREATE TABLE Product" in sql
-    assert "CREATE TABLE ProductType" in sql
-    assert "ALTER TABLE `Product`\n" in sql
-    assert "ADD COLUMN `productType_id` VARCHAR(25),\n" in sql
+    assert 'CREATE TABLE "Product"' in sql
+    assert 'CREATE TABLE "ProductType"' in sql
+    assert 'ALTER TABLE "Product"' in sql
+    assert "ADD COLUMN productType_id VARCHAR(25)" in sql
     assert (
-        "ADD CONSTRAINT `fk_Product_productType_ProductType` FOREIGN KEY "
-        "(`productType_id`) REFERENCES `ProductType`(id) ON DELETE CASCADE;"
+        "ADD CONSTRAINT fk_Product_productType_ProductType FOREIGN KEY "
+        '(productType_id) REFERENCES "ProductType"(id) ON DELETE CASCADE;'
     ) in sql
 
 
@@ -289,9 +295,9 @@ def test_generar_esquema_oto(
             print_output=False,
             print_sql=False,
         )
-    assert "ALTER TABLE `Profile`\n" in sql
-    assert "status userstatus_enum_type\n" in sql
+    assert 'ALTER TABLE "Profile"' in sql
+    assert "status UserStatus_enum" in sql
     assert (
-        "ADD CONSTRAINT `fk_User_profile_Profile` FOREIGN KEY (`user_id`) "
-        "REFERENCES `User`(id) ON DELETE CASCADE;"
+        "ADD CONSTRAINT fk_User_profile_Profile FOREIGN KEY (user_id) "
+        'REFERENCES "User"(id) ON DELETE CASCADE;'
     ) in sql

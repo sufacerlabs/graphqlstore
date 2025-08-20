@@ -18,6 +18,10 @@ from .base import BaseSchemaGenerator
 class GeneratorSchemaPostgreSQL(BaseSchemaGenerator):
     """Generator of specific schemas for PostgreSQL."""
 
+    def dq(self, name: str) -> str:
+        """Wrapp name with double quotes."""
+        return f'"{name}"'
+
     def get_database_type(self) -> DatabaseType:
         """Return the database type PostgreSQL."""
         return DatabaseType.POSTGRESQL
@@ -41,7 +45,7 @@ class GeneratorSchemaPostgreSQL(BaseSchemaGenerator):
 
     def get_table_creation_template(self) -> str:
         """Return the template for creating tables in PostgreSQL."""
-        return "CREATE TABLE {table_name} (\n{columns}\n);"
+        return "CREATE TABLE {t_name} (\n{columns}\n){engine_settings};"
 
     def get_junction_table_template(
         self,
@@ -63,18 +67,20 @@ class GeneratorSchemaPostgreSQL(BaseSchemaGenerator):
         on_delete = source_rel.on_delete
         on_delete_inv = target_rel.on_delete_inverso
 
+        dq = self.dq
+
         return (
-            f"CREATE TABLE {rel.nombre_relacion} ("
-            f"  `{s_t_fld}_{s_t_sfx}` VARCHAR(25) NOT NULL,\n"
-            f"  `{t_t_fld}_{t_t_sfx}` VARCHAR(25) NOT NULL,\n"
-            f"PRIMARY KEY (`{s_t_fld}_{s_t_sfx}`, `{t_t_fld}_{t_t_sfx}`),\n"
-            f"CONSTRAINT `{source_rel.nombre_constraint_fuente}`"
-            f" FOREIGN KEY (`{s_t_fld}_{s_t_sfx}`)"
-            f" REFERENCES `{source_table}`(id) ON DELETE {on_delete},\n"
-            f"CONSTRAINT `{target_rel.nombre_constraint_objetivo}`"
-            f" FOREIGN KEY (`{t_t_fld}_{t_t_sfx}`)"
-            f" REFERENCES `{target_table}`(id) ON DELETE {on_delete_inv}\n"
-            f") {self.get_engine_specific_settings()};"
+            f"CREATE TABLE {dq(rel.nombre_relacion)} (\n"
+            f"  {s_t_fld}_{s_t_sfx} VARCHAR(25) NOT NULL,\n"
+            f"  {t_t_fld}_{t_t_sfx} VARCHAR(25) NOT NULL,\n"
+            f"  PRIMARY KEY ({s_t_fld}_{s_t_sfx}, {t_t_fld}_{t_t_sfx}),\n"
+            f"  CONSTRAINT {source_rel.nombre_constraint_fuente} "
+            f"FOREIGN KEY ({s_t_fld}_{s_t_sfx}) "
+            f"REFERENCES {dq(source_table)}(id) ON DELETE {on_delete},\n"
+            f"  CONSTRAINT {target_rel.nombre_constraint_objetivo} "
+            f"FOREIGN KEY ({t_t_fld}_{t_t_sfx}) "
+            f"REFERENCES {dq(target_table)}(id) ON DELETE {on_delete_inv}\n"
+            f"){self.get_engine_specific_settings()};"
         )
 
     def get_foreign_key_template(
@@ -88,12 +94,13 @@ class GeneratorSchemaPostgreSQL(BaseSchemaGenerator):
         is_null: str,
     ) -> str:
         """Return the template for creating foreign keys in PostgreSQL."""
+        dq = self.dq
+        id_type = self.get_type_mapping()[TipoField.ID.value]
         return (
-            f"ALTER TABLE `{table_fk}`\n"
-            f" ADD COLUMN `{field_fk}_id` VARCHAR(25){unique}{is_null},\n"
-            f" ADD CONSTRAINT `{constraint}`"
-            f" FOREIGN KEY (`{field_fk}_id`)"
-            f" REFERENCES `{table_ref}`(id){on_delete};"
+            f"ALTER TABLE {dq(table_fk)}\n"
+            f"  ADD COLUMN {field_fk}_id {id_type}{unique}{is_null},\n"
+            f"  ADD CONSTRAINT {constraint} FOREIGN KEY ({field_fk}_id) "
+            f"REFERENCES {dq(table_ref)}(id){on_delete};"
         )
 
     def get_unique_constraint_template(self) -> str:
@@ -102,13 +109,13 @@ class GeneratorSchemaPostgreSQL(BaseSchemaGenerator):
 
     def get_primary_key_column(self) -> str:
         """Return the primary key column definition for PostgreSQL."""
-        return "id VARCHAR(25) NOT NULL PRIMARY KEY"
+        id_type = self.get_type_mapping()[TipoField.ID.value]
+        return f"id {id_type} NOT NULL PRIMARY KEY"
 
     def format_enum_values(self, valores: List[str]) -> str:
         """Format enum values for PostgreSQL."""
-        # PostgreSQL mange enums of a different way
-        # created them as custom types
-        return "VARCHAR(50)"  # Fallback a VARCHAR for simplicity
+        enum_values = ", ".join([f"'{valor}'" for valor in valores])
+        return f"ENUM({enum_values})"
 
     def _generate_tables(
         self,
@@ -122,7 +129,8 @@ class GeneratorSchemaPostgreSQL(BaseSchemaGenerator):
 
         # first generate enum types if they exist
         for enum_name, enum_info in enums.items():
-            enum_sql = self._generate_enum_type(enum_name, enum_info)
+            values = enum_info.valores
+            enum_sql = self._generate_enum_type(enum_name, values)
             schema_tables.append(enum_sql)
 
         # then generate the tables
@@ -142,10 +150,12 @@ class GeneratorSchemaPostgreSQL(BaseSchemaGenerator):
 
         return "\n\n".join(schema_tables)
 
-    def _generate_enum_type(self, enum_name: str, enum_info: InfoEnum) -> str:
+    def _generate_enum_type(self, enum_name: str, values: List[str]) -> str:
         """Generate a custom ENUM type for PostgreSQL."""
-        enm_vls = ", ".join([f"'{valor}'" for valor in enum_info.valores])
-        return f"CREATE TYPE {enum_name.lower()}_type AS ENUM " f"({enm_vls});"
+        tem = f"DROP TYPE IF EXISTS {enum_name}_enum CASCADE;\n"
+        tem += f"CREATE TYPE {enum_name}_enum AS "
+        tem += f"{self.format_enum_values(values)};"
+        return tem
 
     def _generate_relationships(
         self,
@@ -333,8 +343,6 @@ class GeneratorSchemaPostgreSQL(BaseSchemaGenerator):
         indexs = []
         has_primary_key = False
 
-        table_sql = f"CREATE TABLE {table_name} (\n"
-
         for field_name, info_campo in table_info.campos.items():
             field_type = info_campo.tipo_campo
             directivas = info_campo.directivas
@@ -352,7 +360,7 @@ class GeneratorSchemaPostgreSQL(BaseSchemaGenerator):
             sql_type = self.get_type_mapping().get(field_type, "TEXT")
             if field_type in enums:
                 # Usar el tipo personalizado de enum
-                sql_type = f"{field_type.lower()}_enum_type"
+                sql_type = f"{field_type}_enum"
 
             if info_campo.es_lista:
                 sql_type = "JSONB"
@@ -374,7 +382,7 @@ class GeneratorSchemaPostgreSQL(BaseSchemaGenerator):
                 if sql_type in (
                     "TEXT",
                     "VARCHAR(255)",
-                ) or ("_enum_type" in sql_type):
+                ) or ("_enum" in sql_type):
                     def_column += " DEFAULT '"
                     valor_default = directivas["default"].argumentos["value"]
                     def_column += f"{valor_default}'"
@@ -388,7 +396,7 @@ class GeneratorSchemaPostgreSQL(BaseSchemaGenerator):
 
             if "updatedAt" in directivas:
                 def_column += " DEFAULT CURRENT_TIMESTAMP"
-                # PostgreSQL usa triggers para auto-update
+                # PostgreSQL use triggers para auto-update
 
             columns.append(def_column)
 
@@ -402,10 +410,16 @@ class GeneratorSchemaPostgreSQL(BaseSchemaGenerator):
         if not has_primary_key:
             columns.insert(0, f"  {self.get_primary_key_column()}")
 
-        table_sql += ",\n".join(columns)
+        joined_columns = ",\n".join(columns)
         if indexs:
-            table_sql += ",\n" + ",\n".join(indexs)
-        table_sql += "\n);"
+            joined_indexs = ",\n".join(indexs)
+            joined_columns += ",\n" + joined_indexs
+
+        table_sql = self.get_table_creation_template().format(
+            t_name=self.dq(table_name),
+            columns=joined_columns,
+            engine_settings=self.get_engine_specific_settings(),
+        )
 
         self.schema_sql.append(table_sql)
 
