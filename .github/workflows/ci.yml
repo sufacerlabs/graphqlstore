@@ -32,3 +32,12 @@ jobs:
 
             - name: Run tests
               run: pytest
+            
+            - name: Coverage Report
+              if: always()
+              uses: aGallea/tests-coverage-report@v1
+              with:
+                min-coverage-percentage: '90'
+                fail-under-coverage-percentage: 'true'
+                cobertura-path: 'reports/coverage.xml'
+                junit-path: 'reports/result.xml'
