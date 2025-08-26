@@ -32,3 +32,15 @@ def fixture_field_name():
         es_requerido=True,
         directivas={},
     )
+
+
+@pytest.fixture(name="field_age")
+def fixture_field_age():
+    """Fixture that provides an age field."""
+    return InfoField(
+        nombre="age",
+        tipo_campo="Int",
+        es_lista=False,
+        es_requerido=False,
+        directivas={},
+    )

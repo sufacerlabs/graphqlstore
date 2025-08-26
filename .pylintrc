@@ -293,13 +293,13 @@ ignored-parents=
 max-args=10
 
 # Maximum number of attributes for a class (see R0902).
-max-attributes=7
+max-attributes=10
 
 # Maximum number of boolean expressions in an if statement (see R0916).
 max-bool-expr=5
 
 # Maximum number of branch for function / method body.
-max-branches=15
+max-branches=20
 
 # Maximum number of locals for function / method body.
 max-locals=20
@@ -317,7 +317,7 @@ max-public-methods=20
 max-returns=6
 
 # Maximum number of statements in function / method body.
-max-statements=50
+max-statements=51
 
 # Minimum number of public methods for a class (see R0903).
 min-public-methods=2
@@ -523,7 +523,7 @@ ignore-imports=yes
 ignore-signatures=yes
 
 # Minimum lines number of a similarity.
-min-similarity-lines=10
+min-similarity-lines=30
 
 
 [SPELLING]

@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch
 import pytest
 from source.cli.migracion.main import migracion
 from source.cli.database.adaptadores.mysql import AdaptadorMySQL
-from source.cli.graphql.mysql_migracion import GeneradorMigracionMySQL
+from source.cli.generators.migration import GeneratorDBMigration
 from source.cli.graphql.configuracion_y_constantes import (
     InfoMigracion,
     InfoDiffEsquema,
@@ -81,6 +81,7 @@ def fixture_adaptador_mysql():
     adaptador.conectar.return_value = None
     adaptador.ejecutar_consulta.return_value = None
     adaptador.cerrar_conexion.return_value = None
+    adaptador.empty_database.return_value = False
     adaptador.cursor = Mock()
     adaptador.cursor.fetchall.return_value = [("users",), ("posts",)]
     return adaptador
@@ -100,8 +101,8 @@ def fixture_adaptador_mysql_sin_tablas():
 
 @pytest.fixture(name="mock_generador_migracion")
 def fixture_generador_migracion():
-    """Fixture que proporciona un GeneradorMigracionMySQL simulado."""
-    generador = Mock(spec=GeneradorMigracionMySQL)
+    """Fixture que proporciona un GeneratorDBMigration simulado."""
+    generador = Mock(spec=GeneratorDBMigration)
 
     # Mock de InfoMigracion con cambios
     mock_diferencias = Mock(spec=InfoDiffEsquema)
@@ -181,7 +182,7 @@ def test_migracion_con_esquema_especificado_exitoso(
             return_value=mock_adaptador,
         ),
         patch(
-            "source.cli.migracion.main.GeneradorMigracionMySQL",
+            "source.cli.migracion.main.GeneratorDBMigration",
             return_value=mock_generador_migracion,
         ),
         patch(
@@ -204,14 +205,15 @@ def test_migracion_con_esquema_especificado_exitoso(
 
         # verificar que se genero la migracion
         mock_generador_migracion.generar_migracion.assert_called_once_with(
-            esquema_anterior=esquema_anterior,
-            esquema_nuevo=esquema_nuevo,
-            visualizar_salida=True,
-            visualizar_sql=True,
+            previous_schema=esquema_anterior,
+            new_schema=esquema_nuevo,
+            print_output=True,
+            print_sql=True,
         )
 
         # verificar conexion a BD y verificacion de tablas
         mock_adaptador.conectar.assert_called_once()
+        mock_adaptador.empty_database.assert_called_once()
         mock_adaptador.ejecutar_consulta.assert_called()
         mock_adaptador.cerrar_conexion.assert_called_once()
 
@@ -299,7 +301,7 @@ def test_migracion_sin_esquema_encuentra_archivo_graphql(
             return_value=mock_adaptador,
         ),
         patch(
-            "source.cli.migracion.main.GeneradorMigracionMySQL",
+            "source.cli.migracion.main.GeneratorDBMigration",
             return_value=mock_generador_migracion,
         ),
         patch(
@@ -386,7 +388,7 @@ def test_migracion_bd_sin_tablas_existentes(
             return_value=mock_adaptador_sin_tablas,
         ),
         patch(
-            "source.cli.migracion.main.GeneradorMigracionMySQL",
+            "source.cli.migracion.main.GeneratorDBMigration",
             return_value=mock_generador_migracion,
         ),
         patch("source.cli.migracion.main.Console") as mock_console,
@@ -408,7 +410,7 @@ def test_migracion_manejo_graphqlstore_error(
 ):
     """Prueba manejo de GraphQLStoreError durante migración."""
     # pylint: disable=too-many-arguments,too-many-positional-arguments
-    mock_generador_error = Mock(spec=GeneradorMigracionMySQL)
+    mock_generador_error = Mock(spec=GeneratorDBMigration)
     mock_generador_error.generar_migracion.side_effect = GraphQLStoreError(
         "Error en GraphQL"
     )
@@ -428,7 +430,7 @@ def test_migracion_manejo_graphqlstore_error(
             return_value=mock_loader,
         ),
         patch(
-            "source.cli.migracion.main.GeneradorMigracionMySQL",
+            "source.cli.migracion.main.GeneratorDBMigration",
             return_value=mock_generador_error,
         ),
         patch("source.cli.migracion.main.Console") as mock_console,
@@ -451,7 +453,7 @@ def test_migracion_manejo_migration_error(
 ):
     """Prueba manejo de MigrationError durante migración."""
 
-    mock_generador_error = Mock(spec=GeneradorMigracionMySQL)
+    mock_generador_error = Mock(spec=GeneratorDBMigration)
     mock_generador_error.generar_migracion.side_effect = MigrationError(
         "Error de migración"
     )
@@ -471,7 +473,7 @@ def test_migracion_manejo_migration_error(
             return_value=mock_loader,
         ),
         patch(
-            "source.cli.migracion.main.GeneradorMigracionMySQL",
+            "source.cli.migracion.main.GeneratorDBMigration",
             return_value=mock_generador_error,
         ),
         patch("source.cli.migracion.main.Console") as mock_console,
@@ -519,7 +521,7 @@ def test_migracion_flujo_completo_integracion(
             return_value=mock_adaptador,
         ),
         patch(
-            "source.cli.migracion.main.GeneradorMigracionMySQL",
+            "source.cli.migracion.main.GeneratorDBMigration",
             return_value=mock_generador_migracion,
         ),
         patch(
@@ -596,7 +598,7 @@ def test_migracion_validacion_parametros_entrada(
             return_value=mock_adaptador,
         ),
         patch(
-            "source.cli.migracion.main.GeneradorMigracionMySQL",
+            "source.cli.migracion.main.GeneratorDBMigration",
             return_value=mock_generador_migracion,
         ),
         patch(
