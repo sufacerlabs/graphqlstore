@@ -1,11 +1,13 @@
 """Base module for database schema generators."""
 
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional
+from typing import Callable, Dict, List, Optional
 from rich.console import Console
 from rich.tree import Tree
 from rich.syntax import Syntax
 from rich.panel import Panel
+
+from source.cli.graphql.exceptions import RelationshipError
 
 
 from ..graphql.configuracion_y_constantes import (
@@ -13,6 +15,7 @@ from ..graphql.configuracion_y_constantes import (
     InfoRelacion,
     InfoTabla,
     DatabaseType,
+    OnDelete,
     TipoRelacion,
 )
 
@@ -112,6 +115,161 @@ class BaseSchemaGenerator(ABC):
     def get_schema_sql(self) -> str:
         """Get the generated SQL schema."""
         return "\n\n".join(self.schema_sql)
+
+    def _determine_fk_table(self, relation: InfoRelacion) -> str:
+        """Determinar en qué tabla va la foreign key."""
+        if relation.tipo_relation in [
+            TipoRelacion.MANY_TO_ONE.value,
+            TipoRelacion.ONE_TO_MANY.value,
+        ]:
+            return (
+                relation.objetivo.tabla_objetivo
+                if relation.fuente.fuente_es_lista
+                else relation.fuente.tabla_fuente
+            )
+
+        if relation.tipo_relation == TipoRelacion.ONE_TO_ONE.value:
+            if relation.fuente.on_delete == OnDelete.CASCADE.value:
+                return relation.fuente.tabla_fuente
+
+            return relation.objetivo.tabla_objetivo
+
+        return relation.fuente.tabla_fuente
+
+    def _determine_fk_field(self, relation: InfoRelacion) -> str:
+        """Determinar nombre del campo foreign key."""
+        fk_field = relation.fuente.campo_fuente
+        source_table = relation.fuente.tabla_fuente
+
+        if relation.tipo_relation in [
+            TipoRelacion.MANY_TO_ONE.value,
+            TipoRelacion.ONE_TO_MANY.value,
+        ]:
+            fk_field = (
+                source_table[0].lower() + source_table[1:]
+                if relation.fuente.fuente_es_lista
+                else relation.fuente.campo_fuente
+            )
+        else:
+            if relation.fuente.on_delete == OnDelete.CASCADE.value and (
+                relation.objetivo.on_delete_inverso != OnDelete.CASCADE.value
+            ):
+                fk_field = (
+                    relation.fuente.campo_fuente
+                    if not relation.objetivo.campo_inverso
+                    else source_table[0].lower() + source_table[1:]
+                )
+            elif relation.fuente.on_delete != OnDelete.CASCADE.value and (
+                relation.objetivo.on_delete_inverso == OnDelete.CASCADE.value
+            ):
+                if relation.objetivo.campo_inverso:
+                    fk_field = relation.objetivo.campo_inverso
+                else:
+                    fk_field = relation.fuente.campo_fuente
+        return fk_field
+
+    def _generate_relationship_inline(
+        self,
+        relationship: InfoRelacion,
+        tables: Dict[str, InfoTabla],
+        get_foreign_key_template: Callable,
+    ) -> str:
+        """Generar relaciones inline para MySQL."""
+        table_fk = self._determine_fk_table(relationship)
+        field_fk = self._determine_fk_field(relationship)
+
+        table_ref = (
+            relationship.objetivo.tabla_objetivo
+            if table_fk == relationship.fuente.tabla_fuente
+            else relationship.fuente.tabla_fuente
+        )
+
+        current_on_delete = self._get_current_on_delete(relationship)
+
+        rel_type = relationship.tipo_relation
+        source_table = relationship.fuente.tabla_fuente
+        source_is_list = relationship.fuente.fuente_es_lista
+        nom_constraint_source = relationship.fuente.nombre_constraint_fuente
+        source_field = relationship.fuente.campo_fuente
+
+        target_table = relationship.objetivo.tabla_objetivo
+
+        if current_on_delete == OnDelete.CASCADE.value:
+            on_delete_action = " ON DELETE CASCADE"
+        else:
+            on_delete_action = " ON DELETE SET NULL"
+
+        unique = " UNIQUE" if rel_type == TipoRelacion.ONE_TO_ONE.value else ""
+
+        # verify if the field is required
+        is_required = False
+        if rel_type == TipoRelacion.MANY_TO_ONE.value and source_is_list:
+            if (
+                relationship.objetivo.campo_inverso
+                and tables[target_table]
+                .campos[relationship.objetivo.campo_inverso]
+                .es_requerido
+            ):
+                is_required = True
+        elif (
+            not source_is_list
+            and tables[source_table].campos[source_field].es_requerido
+        ):
+            is_required = True
+
+        is_null = "" if not is_required else " NOT NULL"
+
+        sql_alter = get_foreign_key_template(
+            table_fk=table_fk,
+            field_fk=field_fk,
+            unique=unique,
+            constraint=nom_constraint_source,
+            table_ref=table_ref,
+            on_delete=on_delete_action,
+            is_null=is_null,
+        )
+
+        self._print_output_relationships(
+            relationship=relationship,
+            data_sql=sql_alter,
+            print_output=self.print_output,
+            print_sql=self.print_sql,
+            sql_name=table_fk,
+        )
+        return sql_alter
+
+    def _get_current_on_delete(
+        self,
+        relationship: InfoRelacion,
+    ) -> Optional[str]:
+        """Get the current on_delete action for the relationship."""
+        rel_type = relationship.tipo_relation
+        on_delete = relationship.fuente.on_delete
+        on_delete_inverse = relationship.objetivo.on_delete_inverso
+
+        current_on_delete = None
+
+        if rel_type == TipoRelacion.MANY_TO_ONE.value:
+            current_on_delete = on_delete_inverse
+        elif rel_type == TipoRelacion.ONE_TO_MANY.value:
+            current_on_delete = on_delete
+        elif rel_type == TipoRelacion.ONE_TO_ONE.value:
+            if (
+                on_delete == OnDelete.CASCADE.value
+                and on_delete_inverse != OnDelete.CASCADE.value
+            ):
+                current_on_delete = on_delete
+            elif (
+                on_delete != OnDelete.CASCADE.value
+                and on_delete_inverse == OnDelete.CASCADE.value
+            ):
+                current_on_delete = on_delete_inverse
+        else:
+            raise RelationshipError(
+                f"Relationship type not supported: {rel_type} "
+                f"for {relationship.nombre_relacion}"
+            )
+        return current_on_delete
 
     @abstractmethod
     def _generate_tables(

@@ -1,16 +1,10 @@
 """Transform GraphQL schema to client schema."""
 
-from graphql import (
-    IDLE,
-    REMOVE,
-    DirectiveNode,
-    FieldDefinitionNode,
-    GraphQLError,
-    Visitor,
-    parse,
-    print_ast,
-    visit,
-)
+from graphql.error import GraphQLError
+from graphql.language import parse
+from graphql.language.ast import DirectiveNode, FieldDefinitionNode
+from graphql.language.printer import print_ast
+from graphql.language.visitor import IDLE, REMOVE, Visitor, visit
 
 
 def transform_schema_graphql(schema: str) -> str:

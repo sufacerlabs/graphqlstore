@@ -1,4 +1,5 @@
 -i https://pypi.org/simple
 graphql-core==3.2.6; python_version >= '3.6' and python_version < '4'
-mysql-connector-python==9.3.0; python_version >= '3.9'
-rich==14.0.0; python_full_version >= '3.8.0'
+mysql-connector-python==9.4.0; python_version >= '3.9'
+psycopg2-binary==2.9.10; python_version >= '3.8'
+rich==14.1.0; python_full_version >= '3.8.0'
