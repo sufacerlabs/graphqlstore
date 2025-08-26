@@ -1,12 +1,6 @@
 """PostgreSQL-specific migration generator."""
 
 from typing import List
-
-from ...graphql.templates import (
-    template_crear_tabla_junction,
-    template_modificar_fk,
-)
-
 from ...graphql.configuracion_y_constantes import (
     DatabaseType,
     InfoCambioEnum,
@@ -14,13 +8,10 @@ from ...graphql.configuracion_y_constantes import (
     InfoField,
     InfoRelacion,
     TipoRelacion,
-    OnDelete,
 )
 from ...graphql.exceptions import (
     MigrationGenerationError,
-    RelationshipError,
 )
-
 from .migration_base import BaseMigrationGenerator
 
 
@@ -47,6 +38,24 @@ class PostgreSQLMigrationGenerator(BaseMigrationGenerator):
             sql_type = f"{field.tipo_campo}_enum"
 
         return sql_type
+
+    def get_foreign_key_template(
+        self,
+        tabla_fk: str,
+        campo_fk: str,
+        unique: str,
+        constraint: str,
+        tabla_ref: str,
+        on_delete: str,
+    ):
+        """Template to modify a foreign key in MySQL."""
+        return (
+            f'ALTER TABLE "{tabla_fk}"\n'
+            f"  ADD COLUMN {campo_fk}_id VARCHAR(25){unique},\n"
+            f"  ADD CONSTRAINT {constraint},\n"
+            f"      FOREIGN KEY ({campo_fk}_id)"
+            f'      REFERENCES "{tabla_ref}"(id){on_delete};'
+        )
 
     def _generate_field_definition(self, field: InfoField) -> str:
         """Generate complete field definition for PostgreSQL."""
@@ -323,7 +332,10 @@ class PostgreSQLMigrationGenerator(BaseMigrationGenerator):
         """Generate SQL to add a relation in PostgreSQL."""
         if relation.tipo_relation == TipoRelacion.MANY_TO_MANY.value:
             return self._generate_sql_junction_table(relation)
-        return self._generate_sql_foreign_key(relation)
+        return self._generate_sql_foreign_key(
+            relation,
+            self.get_foreign_key_template,
+        )
 
     def _generate_sql_remove_relation(self, relation: InfoRelacion) -> str:
         """Generate SQL to remove a relation in PostgreSQL."""
@@ -459,110 +471,3 @@ class PostgreSQLMigrationGenerator(BaseMigrationGenerator):
             )
 
         return f"-- Remove table {table_name}\n{sql}"
-
-    def _generate_sql_junction_table(self, relation: InfoRelacion) -> str:
-        """Generate SQL for a junction table (N:M relation) in PostgreSQL."""
-        source_table = relation.fuente.tabla_fuente
-        target_table = relation.objetivo.tabla_objetivo
-        junction_name = relation.nombre_relacion
-
-        # Skip if already processed
-        if junction_name in self._processed_junction_tables:
-            return ""
-
-        self._processed_junction_tables.add(junction_name)
-
-        is_self_relation = source_table == target_table
-
-        source_suffix = "id" if not is_self_relation else "A"
-        target_suffix = "id" if not is_self_relation else "B"
-
-        on_delete = (
-            OnDelete.SET_NULL.value
-            if (relation.fuente.on_delete == "SET NULL")
-            else OnDelete.CASCADE.value
-        )
-        reverse_on_delete = (
-            OnDelete.SET_NULL.value
-            if (relation.objetivo.on_delete_inverso == "SET_NULL")
-            else OnDelete.CASCADE.value
-        )
-
-        sql = template_crear_tabla_junction(
-            nombre_junction=junction_name,
-            tabla_fuente=source_table,
-            sufi_f=source_suffix,
-            constraint_fuente=relation.fuente.nombre_constraint_fuente,
-            on_delete=on_delete,
-            tabla_objetivo=target_table,
-            sufi_o=target_suffix,
-            constraint_objetivo=relation.objetivo.nombre_constraint_objetivo,
-            reverse_on_delete=reverse_on_delete,
-            engine_setting="",  # PostgreSQL does not use engine settings
-        )
-
-        if self.print_output:
-            self._visualize_sql_operation(
-                "CREATE JUNCTION TABLE",
-                f"Creating junction table {junction_name} for N:M relation",
-                sql,
-            )
-
-        return f"-- Create junction table {junction_name}\n{sql}"
-
-    def _generate_sql_foreign_key(self, relation: InfoRelacion) -> str:
-        """Generate SQL for a foreign key (1:1 and 1:N relations) \
-            in PostgreSQL."""
-        fk_table = self._determine_fk_table(relation)
-        fk_field = self._determine_fk_field(relation)
-        ref_table = (
-            relation.objetivo.tabla_objetivo
-            if fk_table == relation.fuente.tabla_fuente
-            else relation.fuente.tabla_fuente
-        )
-
-        actual_on_delete = "SET NULL"
-        if relation.tipo_relation == TipoRelacion.MANY_TO_ONE.value:
-            actual_on_delete = relation.objetivo.on_delete_inverso
-        elif relation.tipo_relation == TipoRelacion.ONE_TO_MANY.value:
-            actual_on_delete = relation.fuente.on_delete
-        elif relation.tipo_relation == TipoRelacion.ONE_TO_ONE.value:
-            if relation.fuente.on_delete == OnDelete.CASCADE.value and (
-                relation.objetivo.on_delete_inverso != OnDelete.CASCADE.value
-            ):
-                actual_on_delete = relation.fuente.on_delete
-            elif relation.fuente.on_delete != OnDelete.CASCADE.value and (
-                relation.objetivo.on_delete_inverso == OnDelete.CASCADE.value
-            ):
-                actual_on_delete = relation.objetivo.on_delete_inverso
-        else:
-            raise RelationshipError(
-                f"Relationship type not supported: {relation.tipo_relation}",
-                f"for {relation.nombre_relacion}",
-            )
-
-        if actual_on_delete == OnDelete.CASCADE.value:
-            on_delete_action = "ON DELETE CASCADE"
-        else:
-            on_delete_action = "ON DELETE SET NULL"
-
-        rt = relation.tipo_relation
-        unique = " UNIQUE" if rt == TipoRelacion.ONE_TO_ONE.value else ""
-
-        sql = template_modificar_fk(
-            tabla_fk=f'"{fk_table}"',
-            campo_fk=f'\n{fk_field}"',
-            unique=unique,
-            constraint=relation.fuente.nombre_constraint_fuente,
-            tabla_ref=f'"{ref_table}"',
-            on_delete=on_delete_action,
-        )
-
-        if self.print_output:
-            self._visualize_sql_operation(
-                "ADD FOREIGN KEY",
-                f"Adding foreign key {fk_field}_id in {fk_table}",
-                sql,
-            )
-
-        return f"-- Add foreign key {fk_field}_id in {fk_table}\n{sql}"
