@@ -300,3 +300,26 @@ def test_probar_conexion_sin_conexion_ni_cursor(adapt_mysql):
     # verificar que no se lanza error al probar conexion sin conexion ni cursor
     assert adapt_mysql.conexion is None
     assert adapt_mysql.cursor is None
+
+
+def test_database_is_empty(adapt_mysql):
+    """Test to verify if the database is empty."""
+    adapt_mysql.cursor = MagicMock()
+    adapt_mysql.conexion = MagicMock()
+    adapt_mysql.cursor.fetchall.return_value = []
+
+    result = adapt_mysql.empty_database()
+
+    adapt_mysql.cursor.execute.assert_called_once_with("SHOW TABLES;")
+    assert result is True
+
+
+def test_can_not_check_if_database_is_empty(adapt_mysql):
+    """Test to verify cursor or connection is None."""
+    adapt_mysql.cursor = None
+    adapt_mysql.conexion = None
+
+    with pytest.raises(ValueError) as exc_info:
+        adapt_mysql.empty_database()
+
+    assert "Base de datos no conectada." in str(exc_info.value)

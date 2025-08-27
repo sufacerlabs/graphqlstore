@@ -15,85 +15,85 @@
 [![pytest](https://img.shields.io/badge/pytest-8.3.5-brightgreen.svg)](https://docs.pytest.org/en/stable/)
 [![rich](https://img.shields.io/badge/Rich-14.0.0-blue.svg)](https://rich.readthedocs.io/en/stable/introduction.html)
 
-**🚀 Herramienta CLI avanzada para gestionar esquemas GraphQL y base de datos de manera sincronizada**
+**🚀 Advanced CLI Tool to manage GraphQL Schemas and databases in a synchronized way.**
 
-📖 Documentación • ⚡ Inicio Rápido • 🎯 Características • 📊 Ejemplos
+📖 Documentation • ⚡ Getting Started • 🎯 Features • 📊 Examples
 
 </div>
 
 ---
 
-## 🌟 Descripción
+## 🌟 Description
 
-GraphQLStore CLI es una herramienta de línea de comandos profesional que automatiza la gestión de bases de datos MySQL a partir de esquemas GraphQL. Transforma definiciones GraphQL en estructuras de base de datos completamente funcionales con soporte para relaciones complejas, migraciones automáticas y visualización rica.
+GraphQLStore CLI is a professional command-line tool that automates relational database management from GraphQL schemas. It transforms GraphQL definitions into fully functional database structures with support for complex relationships, automatic migrations, and rich visualization.
 
-### ✨ ¿Por qué GraphQLStore CLI?
+### ✨ ¿Why GraphQLStore CLI?
 
-- 🔄 **Transformación Automática**: Convierte esquemas GraphQL a MySQL sin configuración manual
-- 🛡️ **Migraciones Seguras**: Evoluciona tu base de datos preservando la integridad de los datos
-- 🎨 **Visualización Amigable**: Interfaz amigable con Rich Console y syntax highlighting
-- ⚡ **Detección Inteligente**: Encuentra y procesa esquemas automáticamente
-- 🔗 **Relaciones Avanzadas**: Soporte completo para relaciones 1:1, N:1, 1:N y N:M
-- 📊 **Producción Ready**: 97% de cobertura de tests y arquitectura escalable
+- 🔄 **Automatic Transformation**: Convert GraphQL schemas to MySQL/PostgreSQL without manual configuration 
+- 🛡️ **Secure Migrations**: Evolve your database while preserving data integrity
+- 🎨 **User-Friendly Visualization**: Friendly interface with Rich Console and syntax highlighting
+- ⚡ **Intelligent Detection**: Automatically find and process schemas
+- 🔗 **Advanced Relationships**: Full support for 1:1, N:1, 1:N, and N:M relationships
+- 📊 **Production Ready**: 97% test coverage and scalable architecture
 
 ---
 
-## 🎯 Características
+## 🎯 Features
 
-### 🏗️ Comandos Principales
+### 🏗️ Main Commands
 
-| Comando | Descripción | Estado |
+| Command | Description | Status |
 |---------|-------------|--------|
-| `conexion` | Configurar conexión a base de datos MySQL | ✅  |
-| `probar-conexion` | Verificar conectividad y diagnósticos | ✅ |
-| `inicializar` | Crear base de datos desde esquema GraphQL | ✅  |
-| `migracion` | Evolucionar esquemas existentes | ✅ |
-| `server` | Genera una estructura de un servidor GraphQL de pruebas en JavaScript | ✅ |
+| `conexion` | Configure connection to MySQL database | ✅  |
+| `probar-conexion` | Check connectivity and diagnostics | ✅ |
+| `inicializar` | Create database from GraphQL schema | ✅  |
+| `migracion` | Evolve existing schemas | ✅ |
 
-### 🔧 Características Técnicas
+### 🔧 Technical Features
 
-- **🔍 Parser GraphQL**: Análisis completo de esquemas
-- **🔗 Procesador de Relaciones**: Manejo inteligente de relaciones
-- **🗄️ Generador MySQL**: Conversión optimizada GraphQL → SQL
-- **📈 Sistema de Migraciones**: Evolución segura de esquemas
+- **🔍 GraphQL Parser**: Comprehensive schema analysis
+- **🔗 Relationship Processor**: Intelligent relationship handling
+- **🗄️ MySQL Generator**: Optimized conversion GraphQL → SQL
+- **🗄️ PostgreSQL Generator**: Optimized conversion GraphQL → SQL
+- **📈 Migration System**: Safe evolution of schemas
 
-### 🎨 Tipos de Datos Soportados
+### 🎨 Supported Data Types
 
-| GraphQL | MySQL | Características |
+| GraphQL | MySQL | Features |
 |---------|-------|----------------|
-| `ID` | `VARCHAR(25)` | Primary keys automáticos |
-| `String` | `VARCHAR(255)` | Soporte UTF-8 completo |
-| `Int` | `INT` | Enteros |
-| `Boolean` | `BOOLEAN` | Valores true/false |
-| `DateTime` | `DATETIME` | Timestamps con @createdAt/@updatedAt |
-| `Float` | `DECIMAL(10,2)` | Precisión decimal |
-| `JSON` | `JSON` | Objetos complejos nativos |
-| `[]` | `JSON` | Listas de valores |
-| `Enum` | `ENUM(...)` | Enumeraciones tipo-seguras |
-| `!` | `NOT NULL` | Validación de campos obligatorios |
-| sin `!` | `NULL` | Campos opcionales |
+| `ID` | `VARCHAR(25)` | Automatic primary keys |
+| `String` | `VARCHAR(255)` | Full UTF-8 support |
+| `Int` | `INT` | Integers |
+| `Boolean` | `BOOLEAN` | True/false values |
+| `DateTime` | `DATETIME` | Timestamps with @createdAt/@updatedAt |
+| `Float` | `DECIMAL(10,2)` | Decimal precision |
+| `JSON` | `JSON` | Native complex objects |
+| `[]` | `JSON` | Lists of values |
+| `Enum` | `ENUM(...)` | Type-safe enumerations |
+| `!` | `NOT NULL` | Required field validation |
+| sin `!` | `NULL` | Optional fields |
 
-### 📜 Directivas Soportadas
-| Directiva | Descripción | Argumentos |
-|-----------|-------------|------------|
-| `@id` | Define un campo como clave primaria | Ninguno |
-| `@unique` | Asegura que el campo sea único | Ninguno |
-| `@default` | Establece un valor por defecto para el campo | `value` |
-| `@db` | Renombra el campo en la base de datos | `rename` |
-| `@protected` | Oculta el campo en el esquema cliente | Ninguno |
-| `@relation` | Define relaciones entre tipos  | `name`, `type`, `onDelete` |
-| `@createdAt` | Marca el campo con la fecha de creación | Ninguno |
-| `@updatedAt` | Marca el campo con la fecha de actualización | Ninguno |
+### 📜 Supported Directives
+| Directive | Description | Arguments |
+|-----------|-------------|-----------|
+| `@id` | Define a field as primary key | None |
+| `@unique` | Ensure the field is unique | None |
+| `@default` | Set a default value for the field | `value` |
+| `@db` | Rename the field in the database | `rename` |
+| `@protected` | Hide the field in the client schema | None |
+| `@relation` | Define relationships between types | `name`, `type`, `onDelete` |
+| `@createdAt` | Mark the field with the creation date | None |
+| `@updatedAt` | Mark the field with the update date | None |
 
-#### Directiva @id - Clave 
-La directiva `@id` define un campo como clave primaria en la base de datos:
+#### Directive @id - Primary Key
+The `@id` directive defines a field as a primary key in the database:
 
-**Sintaxis**:
+**Syntax**:
 ```graphql
 id: ID! @id
 ```
 
-**Ejemplo**:
+**Example**:
 ```graphql
 type User {
   id: ID! @id
@@ -101,7 +101,7 @@ type User {
 }
 ```
 
-**SQL generado**:
+**Generated SQL**:
 ```sql
 CREATE TABLE User (
   id VARCHAR(25) NOT NULL PRIMARY KEY,
@@ -109,24 +109,23 @@ CREATE TABLE User (
 );
 ```
 
-#### Directiva @unique - Campos Únicos
-La directiva `@unique` asegura que un campo de tipo escalar tenga valores únicos en la base de datos:
+#### Directive @unique - Unique Fields
+The `@unique` directive ensures that a scalar field has unique values in the database:
 
-**Sintaxis**:
+**Syntax**:
 ```graphql
 campo: Tipo! @unique
 ```
 
-#### Directiva @default - Valores por defecto
+#### Directive @default - Default Values
+The `@default` directive allows setting default values for scalar fields:
 
-La directiva `@default` permite establecer valores por defecto para campos escalares:
-
-**Sintaxis**:
+**Syntax**:
 ```graphql
 campo: Tipo! @default(value: "valor_por_defecto")
 ```
 
-**Ejemplos**:
+**Examples**:
 ```graphql
 type User {
   active: Boolean! @default(value: "true")
@@ -135,7 +134,7 @@ type User {
 }
 ```
 
-**SQL generado**:
+**Generated SQL**:
 ```sql
 CREATE TABLE User (
   active BOOLEAN NOT NULL DEFAULT true,
@@ -144,16 +143,16 @@ CREATE TABLE User (
 );
 ```
 
-#### Directiva @db - Renombrado de columnas
+#### Directive @db - Column Renaming
 
-La directiva `@db` permite usar nombres diferentes entre GraphQL y la base de datos:
+The `@db` directive allows using different names between GraphQL and the database:
 
-**Sintaxis**:
+**Syntax**:
 ```graphql
 campo: Tipo! @db(rename: "nombre_columna_sql")
 ```
 
-**Ejemplos**:
+**Examples**:
 ```graphql
 type User {
    fullName: String! @db(rename: "full_name")
@@ -162,7 +161,7 @@ type User {
 }
 ```
 
-**SQL generado**:
+**Generated SQL**:
 ```sql
 CREATE TABLE User (
   full_name VARCHAR(255) NOT NULL,
@@ -171,25 +170,25 @@ CREATE TABLE User (
 );
 ```
 
-#### Directiva @relation - Relaciones avanzadas
+#### Directive @relation - Advanced Relationships
 
-La directiva `@relation` gestiona relaciones complejas entre tipos con control granular:
+The `@relation` directive manages complex relationships between types with granular control:
 
-**Sintaxis**:
+**Syntax**:
 ```graphql
 campo: [Tipo] @relation(name: "NombreRelacion", type: TIPO_RELACION, onDelete: ACCION)
 ```
 
-**Argumentos**:
-- `name`: Nombre único de la relación (requerido para toda relacion)
-- `type`: Tipo de relación física
-  - `INLINE`: Opcional para relaciones 1:1, N:1 y 1:N (clave foránea)
-  - `TABLA`: Requerido para relaciones N:M (tabla intermedia)
-- `onDelete`: Acción al eliminar registro padre
-  - `CASCADE`: Eliminación en cascada (elimina registros hijos)
-  - `SET_NULL`: Establece NULL en registros hijos (no elimina)
+**Arguments**:
+- `name`: unique name of the relationship (required for all relationships)
+- `type`: Type of physical relationship
+  - `INLINE`: Optional for 1:1, N:1, and 1:N relationships (foreign key)
+  - `TABLA`: Required for N:M relationships (junction table)
+- `onDelete`: Action when deleting parent record
+  - `CASCADE`: Cascade deletion (deletes child records)
+  - `SET_NULL`: Sets NULL on child records (does not delete)
 
-**Ejemplos de relaciones N:1 con INLINE**:
+**Examples of N:1 relationships with INLINE**:
 ```graphql
 type User {
    id: ID! @id
@@ -204,7 +203,7 @@ type Post {
 }
 ```
 
-**SQL generado para N:1**:
+**Generated SQL for N:1**:
 ```sql
 -- Tabla User
 CREATE TABLE User (
@@ -220,7 +219,7 @@ CREATE TABLE Post (
 );
 ```
 
-**Ejemplos de relaciones 1:N con INLINE**:
+**Examples of 1:N relationships with INLINE**:
 ```graphql
 type Product {
    id: ID! @id
@@ -235,7 +234,7 @@ type ProductType {
 }
 ```
 
-**SQL generado para 1:N**:
+**Generated SQL for 1:N**:
 ```sql
 -- Tabla ProductType
 CREATE TABLE ProductType (
@@ -253,22 +252,22 @@ CREATE TABLE Product (
 ```
 
 
-**Ejemplos de relaciones N:M con TABLA**:
+**Examples of N:M relationships with TABLE**:
 ```graphql
 type Post {
    id: ID! @id
    title: String!
-   tags: [Tag] @relation(name: "PostTags", type: TABLA, onDelete: CASCADE)
+   tags: [Tag] @relation(name: "PostTags", type: TABLE, onDelete: CASCADE)
 }
 
 type Tag {
    id: ID! @id
    name: String! @unique
-   posts: [Post] @relation(name: "PostTags", type: TABLA, onDelete: CASCADE)
+   posts: [Post] @relation(name: "PostTags", type: TABLE, onDelete: CASCADE)
 }
 ```
 
-**SQL generado para N:M**:
+**Generated SQL for N:M**:
 ```sql
 -- Tabla Post
 CREATE TABLE Post (
@@ -294,30 +293,30 @@ CREATE TABLE PostTags (
 
 ---
 
-## ⚡ Inicio Rápido
+## ⚡ Getting Started
 
-### 📦 Instalación
+### 📦 Installation
 
-#### Desde PyPI (Recomendado)
+#### From PyPI (Recommended)
 ```bash
 pip install graphqlstore
 ```
 
-#### Desde Código Fuente
+#### From Source Code
 ```bash
 git clone https://github.com/your-username/graphqlstore.git
 cd graphqlstore
 pipenv install --dev
 ```
 
-### 🚀 Flujo Básico
+### 🚀 Basic Workflow
 
-#### 1. **Configurar Conexión**
+#### 1. **Configure Connection**
 ```bash
-# Configuración interactiva
+# Interactive setup
 graphqlstore conexion
 
-# O con parámetros directos
+# or direct connection with parameters
 graphqlstore conexion \
   --host localhost \
   --puerto 3306 \
@@ -326,12 +325,12 @@ graphqlstore conexion \
   --base-datos mi_app
 ```
 
-#### 2. **Verificar Conexión**
+#### 2. **Verify Connection**
 ```bash
 graphqlstore probar-conexion --verbose
 ```
 
-#### 3. ***Diseñar Esquema GraphQL**
+#### 3. **Design GraphQL Schema**
 ```graphq
 type User {
    id: ID! @id
@@ -340,38 +339,28 @@ type User {
 }
 ```
 
-#### 3. **Inicializar Base de Datos**
+#### 3. **Initialize Database**
 ```bash
-# Desde archivo específico
-# NOTA: Es necesario indicar el esquema si hay varios archivos .graphql
-# en el directorio actual
+# From specific file
+# NOTE: It is necessary to specify the schema if there are multiple .graphql files
+# in the current directory
 graphqlstore inicializar --esquema schema.graphql
 
-# Detección automática
+# Automatic detection
 graphqlstore inicializar
 ```
 
-#### 4. **Evolucionar Esquema** 
+#### 4. **Evolve Schema**
 ```bash
-# Migración automática
-# NOTA: Es necesario indicar el esquema si hay varios archivos .graphql
-# en el directorio actual
+# Automatic migration
+# NOTE: It is necessary to specify the schema if there are multiple .graphql files
+# in the current directory
 graphqlstore migracion --esquema schema.graphql
 ```
 
-**NOTA: SI DESEAS COMPROBAR O INTEGRAR LA HERRAMIENTA EN BACKEND CON ARQUITECTURA GRAPHQL, SERA NECESARIO EJECUTAR PRIMERO `graphqlstore servidor` PARA GENERAR LA ESTRUCTURA DEL SERVIDOR.**
+## 📊 Examples
 
-```bash
-graphqlstore servidor
-```
-
-PARA MAYOR INFORMACIÓN SOBRE EL COMANDO `servidor`, CONSULTE LA DOCUMENTACIÓN DEL COMANDO [servidor](source/cli/servidor/README.md).
-
----
-
-## 📊 Ejemplos
-
-### 🎮 Esquema GraphQL de Ejemplo
+### 🎮 Example GraphQL Schema
 
 ```graphql
 scalar Json
@@ -412,7 +401,7 @@ enum UserRole {
 }
 ```
 
-### 🗄️ SQL Generado Automáticamente
+### 🗄️ Automatically Generated SQL
 
 ```sql
 -- Tabla User con constraints
@@ -439,7 +428,7 @@ ADD CONSTRAINT `fk_User_profile_Profile` FOREIGN KEY (`user_id`)
 REFERENCES `User`(id) ON DELETE CASCADE;
 ```
 
-### 📈 Visualización Amigable
+### 📈 Friendly Visualization
 
 ```bash
 GraphQLStore CLI v3.0.0
@@ -462,163 +451,163 @@ Desplegando servicio
 
 ---
 
-## 🏗️ Arquitectura
+## 🏗️ Architecture
 
-### 📁 Estructura del Proyecto
+### 📁 Project Structure
 
 ```
 graphqlstore/
 ├── 📂 source/cli/
-│   ├── 🔌 conexion/          # Gestión de configuración BD
-│   ├── 🩺 probar_conexion/   # Diagnósticos y validación
-│   ├── 🚀 inicializar/       # Inicialización de esquemas
-│   ├── 📈 migracion/         # Sistema de migraciones
-│   ├── 🔍 graphql/           # Motor GraphQL
-│   │   ├── parser.py         # Parser de esquemas
-│   │   ├── mysql_generador.py # Generador SQL
-│   │   ├── mysql_migracion.py # Motor de migraciones
-│   │   └── procesar_relaciones.py # Procesador de relaciones
-│   ├── 🗄️ database/         # Adaptadores de BD
-│   └── 🛠️ utilidades/       # Herramientas auxiliares
-├── 📂 tests/                 # Suite de pruebas (97% cobertura)
-└── 📂 .github/workflows/     # CI/CD automatizado
-├── 📄 README.md              # Documentación principal
-├── 📄 LICENSE                # Licencia del proyecto
-├── 📄 setup.py               # Configuración del paquete
-├── 📄 requirements.txt       # Dependencias del proyecto
-├── 📄 requirements-dev.txt   # Dependencias de desarrollo
-├── 📄 .pre-commit-config.yaml # Configuración de pre-commit
-├── 📄 Pipfile                # Gestión de dependencias con Pipenv
-├── 📄 pyproject.toml         # Configuración del proyecto
-├── 📄 .pylintrc           # Configuración de pylint
+│   ├── 🔌 conexion/          # Manage database configuration
+│   ├── 🩺 probar_conexion/   # Diagnostics and validation
+│   ├── 🚀 inicializar/       # Schema initialization
+│   ├── 📈 migracion/         # Migration system
+│   ├── 🔍 graphql/           # GraphQL engine
+│   │   ├── parser.py         # Schema parser
+│   │   ├── mysql_generador.py # SQL generator
+│   │   ├── mysql_migracion.py # Migration engine
+│   │   └── procesar_relaciones.py # Relations processor
+│   ├── 🗄️ database/         # Database adapters
+│   └── 🛠️ utilidades/       # Utility tools
+├── 📂 tests/                 # Test suite (97% coverage)
+└── 📂 .github/workflows/     # Automated CI/CD
+├── 📄 README.md              # Main documentation
+├── 📄 LICENSE                # Project license
+├── 📄 setup.py               # Package configuration
+├── 📄 requirements.txt       # Project dependencies
+├── 📄 requirements-dev.txt   # Development dependencies
+├── 📄 .pre-commit-config.yaml # Pre-commit configuration
+├── 📄 Pipfile                # Dependency management with Pipenv
+├── 📄 pyproject.toml         # Project configuration
+├── 📄 .pylintrc              # Pylint configuration
 ```
 
-### 🔧 Componentes Principales
+### 🔧 Main Components
 
-#### 🔍 **Parser GraphQL** ([`source/cli/graphql/docs/parser.md`](source/cli/graphql/docs/parser.md))
-- Análisis de esquemas GraphQL
-- Extracción de tipos, campos y directivas
-- Validación de sintaxis y semántica
+#### 🔍 **GraphQL Parser** ([`source/cli/graphql/docs/parser.md`](source/cli/graphql/docs/parser.md))
+- Schema analysis
+- Extraction of types, fields, and directives
+- Syntax and semantic validation
 
-#### 🔗 **Procesador de Relaciones** ([`source/cli/graphql/docs/procesar_relaciones.md`](source/cli/graphql/docs/procesar_relaciones.md))
-- Detección automática de relaciones
-- Clasificación 1:1, 1:N, N:M
-- Generación de constraints
+#### 🔗 **Relations Processor** ([`source/cli/graphql/docs/procesar_relaciones.md`](source/cli/graphql/docs/procesar_relaciones.md))
+- Automatic relationship detection
+- Classification 1:1, 1:N, N:M
+- Constraint generation
 
-#### 🗄️ **Generador MySQL** ([`source/cli/graphql/docs/mysql_generador.md`](source/cli/graphql/docs/mysql_generador.md))
-- Transformación GraphQL → SQL
-- Generación de DDL completo
+#### 🗄️ ****MySQL Generator** ([`source/cli/graphql/docs/mysql_generador.md`](source/cli/graphql/docs/mysql_generador.md))
+- GraphQL → SQL transformation
+- Complete DDL generation
 
-#### 📈 **Sistema de Migraciones** ([`source/cli/graphql/docs/mysql_migracion.md`](source/cli/graphql/docs/mysql_migracion.md))
-- Detección inteligente de cambios
-- Generación de SQL incremental
-- Preservación de integridad referencial
+#### 📈 **Migration System** ([`source/cli/graphql/docs/mysql_migracion.md`](source/cli/graphql/docs/mysql_migracion.md))
+- Intelligent change detection
+- Incremental SQL generation
+- Referential integrity preservation
 
 ---
 
-## 🛠️ Entorno de Desarrollo
+## 🛠️ Development Environment
 
-### 📋 Requisitos
+### 📋 Requirements
 - **Python**: 3.10+
 - **MySQL**: 8.0+
-- **Pipenv**: Para gestión de dependencias
+- **Pipenv**: For dependency management
 
-### 🔧 Herramientas de Calidad
+### 🔧 Quality Tools
 
-| Herramienta | Propósito | Estado |
-|-------------|-----------|--------|
-| **pytest** | Testing framework | ✅ 97% cobertura |
-| **black** | Formateo de código | ✅ Configurado |
-| **flake8** | Linting (ligero) | ✅ Configurado |
-| **pylint** | Linting (exhausto) | ✅ Configurado |
-| **mypy** | Type checking | ✅ Configurado |
-| **pre-commit** | Git hooks | ✅ Configurado |
+| Tool | Purpose | Status |
+|------|---------|--------|
+| **pytest** | Testing framework | ✅ 97% coverage |
+| **black** | Code formatting | ✅ Configured |
+| **flake8** | Linting (lightweight) | ✅ Configured |
+| **pylint** | Linting (exhaustive) | ✅ Configured |
+| **mypy** | Type checking | ✅ Configured |
+| **pre-commit** | Git hooks | ✅ Configured |
 
 
-## 📊 Cobertura y Calidad
+## 📊 Coverage and Quality
 
-### 🎯 Métricas de Cobertura
+### 🎯 Coverage Metrics
 
-| Módulo | Statements | Miss | Branch | BrPart | Cover |
+| MModule | Statements | Miss | Branch | BrPart | Cover |
 |--------|------------|------|--------|--------|-------|
 | **Parser GraphQL** | 67 | 1 | 18 | 1 | **98%** |
 | **Procesador Relaciones** | 96 | 4 | 38 | 6 | **93%** |
 | **Generador MySQL** | 237 | 5 | 94 | 11 | **95%** |
 | **Sistema Migraciones** | 396 | 17 | 208 | 23 | **93%** |
 | **Comandos CLI** | 271 | 11 | 52 | 3 | **100%** |
-| **🎯 TOTAL PROYECTO** | **3151** | **62** | **482** | **53** | **🏆 97%** |
+| **🎯 TOTAL PROYECTO** | **4860** | **88** | **702** | **85** | **🏆 97%** |
 
-### ✅ Suite de Pruebas (TOTAL PROYECTO)
+### ✅ Test Suite (TOTAL PROJECT)
 
-- **📈 128 pruebas** ejecutándose en **4.54 segundos**
-- **🎯 97% cobertura global** con **0 fallos**
-- **🔍 Casos edge** y **integración completa**
-- **🚀 CI/CD automatizado** en GitHub Actions
+- **📈 234 tests** running in **4.54 seconds**
+- **🎯 97% global coverage** with **0 failures**
+- **🔍 Edge cases** and **full integration**
+- **🚀 Automated CI/CD** on GitHub Actions
 
 ---
 
 ## 🔄 CI/CD Pipeline
 
-### 🛠️ Flujo Automatizado
+### 🛠️ Automatized Workflow
 
 ### 🔍 **CI Pipeline** (`.github/workflows/ci.yml`)
 
-**🔄 Flujo de Integración Continua:**
+**🔄 Continuous Integration Flow:**
 
 ```
-📋 Entrada (Push/PR) 
+📋 Input (Push/PR)
    ↓
-🔧 Instalación de Dependencias
+🔧 Dependency Installation
    ↓
 🎯 Pre-commit Hooks
-   ├── ⚫ Black (Formateo)
-   ├── 🔍 Flake8 (Linting ligero)
-   ├── 📋 Pylint (Análisis exhaustivo)
+   ├── ⚫ Black (Code formatting)
+   ├── 🔍 Flake8 (Lightweight linting)
+   ├── 📋 Pylint (Exhaustive analysis)
    └── 🔤 Mypy (Type checking)
    ↓
-🧪 Testing Suite + Cobertura
+🧪 Testing Suite + Coverage
    ↓
-✅ Pipeline Completo
+✅ Complete Pipeline
 ```
 
-| Etapa | Proceso | Estado |
+| Stage | Process | Status |
 |-------|---------|--------|
-| **🔧 Setup** | Instalación de dependencias | ✅ |
-| **🎯 Quality** | Pre-commit hooks completos | ✅ |
-| **⚫ Black** | Formateo automático de código | ✅ |
-| **🔍 Flake8** | Linting ligero y rápido | ✅ |
-| **📋 Pylint** | Análisis exhaustivo de código | ✅ |
-| **🔤 Mypy** | Verificación estática de tipos | ✅ |
-| **🧪 Testing** | Suite completa con cobertura | ✅ |
+| **🔧 Setup** | Dependency installation | ✅ |
+| **🎯 Quality** | Complete pre-commit hooks | ✅ |
+| **⚫ Black** | Automatic code formatting | ✅ |
+| **🔍 Flake8** | Lightweight and fast linting | ✅ |
+| **📋 Pylint** | Exhaustive code analysis | ✅ |
+| **🔤 Mypy** | Static type checking | ✅ |
+| **🧪 Testing** | Complete suite with coverage | ✅ |
 
 ### 🚀 **CD Pipeline** (`.github/workflows/cd.yml`)
 
-**📦 Flujo de Despliegue Continuo:**
+**📦 Continuous Deployment Flow:**
 
 ```
 🏷️ Release Tag
    ↓
-🛠️ Configuración Build Tools
+🛠️ Build Tools Configuration
    ↓
-📦 Empaquetado Multi-formato
+📦 Multi-format Packaging
    ├── 🎯 Wheel Distribution
    └── 📄 Source Distribution
    ↓
-🚀 Publicación PyPI
+🚀 Publish to PyPI
    ↓
 📋 GitHub Release + Artifacts
    ↓
-✅ Deploy Completo
+✅ Complete Deploy
 ```
 
-| Etapa | Proceso | Descripción |
+| Stage | Process | Description |
 |-------|---------|-------------|
-| **🛠️ Setup** | Configuración de herramientas | Preparación del entorno de build |
-| **📦 Build** | Empaquetado multi-formato | Wheel + Source distributions |
-| **🎯 Wheel** | Distribución binaria | Instalación rápida optimizada |
-| **📄 Source** | Distribución de código fuente | Máxima compatibilidad |
-| **🚀 PyPI** | Publicación automática | Deploy en nuevas versiones |
-| **📋 GitHub** | Release + artifacts | Documentación y archivos |
+| **🛠️ Setup** | Tools configuration | Preparation of the build environment |
+| **📦 Build** | Multi-format packaging | Wheel + Source distributions |
+| **🎯 Wheel** | Binary distribution | Optimized fast installation |
+| **📄 Source** | Source distribution | Maximum compatibility |
+| **🚀 PyPI** | Automatic publication | Deploy in new versions |
+| **📋 GitHub** | Release + artifacts | Documentation and files |
 
 ### ⚡ **Pipeline Triggers**
 - **CI**: `push`, `pull_request` → `main`
@@ -626,54 +615,55 @@ graphqlstore/
 
 ### 📦 Releases
 
-| Versión | Estado | Características |
+| Version | Status | Features |
 |---------|--------|----------------|
-| **v0.x.0** | ✅ | Despligue funcionamiento correcto |
-| **v1.0.0** | ✅ | Core completo |
-| **v2.0.0** | ✅ | Directivas avanzadas |
-| **v3.0.0** | ✅ | Generador de servidor GraphQL en JavaScript |
-| **v3.x.0** | 🎯 **Actual** | Bugs, mejoras y documentación |
+| **v0.x.0** | ✅ | Correct Deployment |
+| **v1.0.0** | ✅ | Complete Core |
+| **v2.0.0** | ✅ | Advanced Directives |
+| **v3.0.0** | ✅ | Template generator of GraphQL server in JS |
+| **v3.x.0** | ✅ | Bugs, improves and documentation |
+| **v4.0.0** | 🎯 **Current** | Refactorization, implementation of new design patterns and support multi-database (PostgreSQL) |
 ---
 
-## 📚 Documentación
+## 📚 Documentation
 
-### 📖 Guías Detalladas
+### 📖 Detailed Guides
 
-- 🔌 **[Comando `conexion`](source/cli/conexion/README_latest.md)** - Configuración de base de datos
-- 🩺 **[Comando `probar-conexion`](source/cli/probar_conexion/README.md)** - Diagnósticos y validación de base de datos
-- 🚀 **[Comando `inicializar`](source/cli/inicializar/README.md)** - Inicialización de esquemas
-- 📈 **[Comando `migracion`](source/cli/migracion/README.md)** - Sistema de migraciones
-- 🔍 **[Comando `servidor`](source/cli/servidor/README.md)** - Generador de servidor GraphQL en JavaScript
+- 🔌 **[Command `conexion`](source/cli/conexion/README_latest.md)** - Database configuration
+- 🩺 **[Command `probar-conexion`](source/cli/probar_conexion/README.md)** - Diagnostics and database validation
+- 🚀 **[Command `inicializar`](source/cli/inicializar/README.md)** - Initialization of schemas
+- 📈 **[Command `migracion`](source/cli/migracion/README.md)** - Migration system
+- 🔍 **[Command `servidor`](source/cli/servidor/README.md)** - GraphQL server generator in JavaScript
 
-### 🔧 Documentación Técnica
+### 🔧 Technical Documentation
 
-- 🔍 **[Parser GraphQL](source/cli/graphql/docs/parser.md)** - Motor de análisis
-- 🔗 **[Procesador de Relaciones](source/cli/graphql/docs/procesar_relaciones.md)** - Gestión de relaciones
-- 🗄️ **[Generador MySQL](source/cli/graphql/docs/mysql_generador.md)** - Transformación SQL
-- 📈 **[Sistema de Migraciones](source/cli/graphql/docs/mysql_migracion.md)** - Evolución de esquemas
+- 🔍 **[Parser GraphQL](source/cli/graphql/docs/parser.md)** - Parsing engine
+- 🔗 **[Relationship Processor](source/cli/graphql/docs/procesar_relaciones.md)** - Relationship management
+- 🗄️ **[MySQL Generator](source/cli/graphql/docs/mysql_generador.md)** - SQL transformation
+- 📈 **[Migration System](source/cli/graphql/docs/mysql_migracion.md)** - Schema evolution
 
 ---
 
-## 🎯 Casos de Uso
+## 🎯 Use Cases
 
-### 🚀 **Desarrollo de APIs**
+### 🚀 **API Development**
 ```bash
-# Inicialización completa de proyecto
+# Complete project initialization
 graphqlstore conexion
 graphqlstore inicializar
-# ✅ Base de datos lista para desarrollo
+# ✅ Database ready for development
 ```
 
-### 🔄 **Evolución de Esquemas**
+### 🔄 **Evolution of Schemas**
 ```bash
-# Migración automática
+# Automatic migration
 graphqlstore migracion
-# ✅ Esquema actualizado preservando datos (de tablas y relaciones existentes)
+# ✅ Schema updated preserving data (from existing tables and relationships)
 ```
 
-### 🏭 **Integración CI/CD**
+### 🏭 **Integration CI/CD**
 ```bash
-# Modo silencioso para pipelines
+# Silent mode for pipelines
 graphqlstore migracion \
   --esquema schemas/production.graphql \
   --no-visualizar-salida \
@@ -682,69 +672,60 @@ graphqlstore migracion \
 
 ---
 
-## 🤝 Contribuir
+## 🤝 Contribute
 
-### 🐛 Reportar Issues
+### 🐛 Report Issues
 
-### muy pronto
+### Coming Soon
 
-### 📝 Desarrollo Local
+### 📝 Local Development
 
-### muy pronto
+### Coming Soon
 
 ---
 
 ## 🗺️ Roadmap
 
 ### 🚀 **v1.0.0** - Core
-- [x] `conexion` - Configuración de conexión a MySQL
-- [x] `probar-conexion` - Verificación de conectividad
-- [x] `inicializar` - Inicialización de base de datos desde esquema GraphQL
-- [x] `migracion` - Sistema de migraciones automático
+- [x] `conexion` - Configure connection to MySQL
+- [x] `probar-conexion` - Connectivity verification
+- [x] `inicializar` - Database initialization from GraphQL schema
+- [x] `migracion` - Automatic migration system
 
-### 🎯 **v2.0.0** - Directivas Avanzadas
-- [x] `@unique` - Campos únicos
-- [x] `@default` - Valores por defecto
-- [x] `@db` - Renombrado de campos
-- [x] `@protected` - Campos protegidos
+### 🎯 **v2.0.0** - Advanced Directives
+- [x] `@unique` - Unique fields
+- [x] `@default` - Default values
+- [x] `@db` - Field renaming
+- [x] `@protected` - Protected fields
 
 ### 🚀 **v3.0.0** - GraphQL Server
-- [x]  `server` - Genera estructura de servidor GraphQL en JavaScript
+- [x]  `server` - Generate GraphQL server structure in JavaScript
 
-### 🏭 **v3.x.0** - Bugs, mejoras y documentacion
-- [x] Arreglar bugs y maltipados
-- [x] Mejorar el flujo de funcionamiento del comando conexión
-- [x] Mejorar las funcionalidades del core
-- [x] Agregar documentación del comando `servidor`
-- [x] Mejorar toda documentación
-- [x] Mejorar la implementación del servidor GraphQL.js
-- [ ] Implementar comando de inicio de sesion
-- [ ] Implementar comando logout
-- [ ] Implementar comando para gestionar la creacion de base de datos
+### 🏭 **v3.x.0** - Bugs, improvements and documentation
+- [x] Fix bugs and improve performance
+- [x] Enhance the workflow of the connection command
+- [x] Improve core functionalities
+- [x] Add documentation for the `server` command
+- [x] Improve all documentation
+- [x] Improve the implementation of the GraphQL.js server
 
 ### 🏭 **v4.0.0** - Multi-Database
-- [ ] Refactorizar modulos `GeneradorEsquemaMySQL` y `GenerarMigracionMySQL` implementando patrones de diseño para escalar el codigo y mejorar la mantenibilidad, sobre todo para implementar la funcionalidad multi-base de datos.
-- [ ] Implementar soporte PostgreSQL
-- [ ] Implementar soporte a Redis
+- [x] Refactor `GeneradorEsquemaMySQL` and `GenerarMigracionMySQL` modules implementing design patterns to scale the code and improve maintainability, especially to implement multi-database functionality.
+- [x] Implement PostgreSQL support
 ---
 
 
-## 📜 Licencia
+## 📜 License
 
-Este proyecto utiliza una **Licencia Privada** que prohíbe:
-- ❌ Redistribución en cualquier forma
-- ❌ Modificación del software
-- ❌ Creación de obras derivadas
-- ❌ Uso comercial no autorizado
-- ❌ Compartición pública
+This project uses a **Open Source License - Apache 2.0**.
 
-Ver LICENSE para detalles completos.
+See LICENSE for full details.
 
 ---
 
 <div align="center">
 
-### 🚀 **¡Transforma tus esquemas GraphQL en bases de datos MySQL con un solo comando!**
+### 🚀 **¡Transform your GraphQL schemas into relational databases with a single command!**
 
 [![Get Started](https://img.shields.io/badge/Get%20Started-brightgreen?style=for-the-badge&logo=rocket)](https://pypi.org/project/graphqlstore/)
 [![Documentation](https://img.shields.io/badge/Documentation-blue?style=for-the-badge&logo=book)](source/cli/)
@@ -752,8 +733,8 @@ Ver LICENSE para detalles completos.
 
 ---
 
-**📧 ¿Preguntas?** • **🐛 ¿Problemas?** • **💡 ¿Ideas?**
+**📧 Questions?** • **🐛 Issues?** • **💡 Ideas?**
 
-MUY PRONTO
+COMING SOON
 
 </div>

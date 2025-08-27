@@ -23,3 +23,7 @@ class SchemaComparisonError(MigrationError):
 
 class MigrationGenerationError(MigrationError):
     """Excepción para errores en generación de SQL de migración."""
+
+
+class DatabaseNotSupportedError(Exception):
+    """Raised when the specified database type is not supported."""

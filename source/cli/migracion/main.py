@@ -14,12 +14,13 @@ from ..graphql.exceptions import (
     MigrationGenerationError,
 )
 
-from ..graphql.mysql_generador import GeneradorEsquemaMySQL
-
 from ..loaders.conf_json_loader import ConfiguracionJsonLoader
 
 from ..utilidades.gestor_archivo import GestorArchivo
-from ..graphql.mysql_migracion import GeneradorMigracionMySQL
+from ..graphql import (
+    transform_schema_graphql,
+)
+from ..generators.migration import GeneratorDBMigration
 
 
 def migracion(args):
@@ -94,13 +95,13 @@ def migracion(args):
 
     try:
         # migrar esquema GraphQL
-        generador_migracion_mysql = GeneradorMigracionMySQL()
+        generador_migracion = GeneratorDBMigration()
 
-        migra = generador_migracion_mysql.generar_migracion(
-            esquema_anterior=esquema_antiguo,
-            esquema_nuevo=esquema_nuevo,
-            visualizar_salida=not args.no_visualizar_salida,
-            visualizar_sql=not args.no_visualizar_sql,
+        migra = generador_migracion.generar_migracion(
+            previous_schema=esquema_antiguo,
+            new_schema=esquema_nuevo,
+            print_output=not args.no_visualizar_salida,
+            print_sql=not args.no_visualizar_sql,
         )
 
         if len(migra.sql_generado) == 0:
@@ -108,11 +109,8 @@ def migracion(args):
 
         adaptador = AdaptadorMySQL()
         adaptador.conectar(config)
-        adaptador.ejecutar_consulta("SHOW TABLES;")
 
-        tablas = adaptador.cursor.fetchall()
-
-        if len(tablas) == 0:
+        if adaptador.empty_database():
             consola.print(
                 "\n :cross_mark: ejecuta el comando "
                 "[bold green]inicializar[/bold green] "
@@ -141,8 +139,7 @@ def migracion(args):
         )
 
         # actualizar el esquema cliente graphql
-        generador = GeneradorEsquemaMySQL()
-        esquema_cliente = generador.transformar_esquema_graphql(
+        esquema_cliente = transform_schema_graphql(
             esquema_nuevo,
         )
         GestorArchivo.escribir_archivo(
