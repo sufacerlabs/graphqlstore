@@ -36,10 +36,15 @@ jobs:
               run: pytest
             
             - name: Coverage Report
-              if: always()
-              uses: aGallea/tests-coverage-report@1.3.5
+              id: coverage
+              uses: MishaKav/pytest-coverage-comment@main
               with:
-                min-coverage-percentage: '90'
-                fail-under-coverage-percentage: 'true'
-                cobertura-path: './coverage.xml'
-                junit-path: './result.xml'
+                pytest-coverage-path: './reports/coverage.xml'
+                junitxml-path: './reports/junit.xml'
+                github-token: ${{ secrets.GITHUB_TOKEN }}
+              
+            - name: Coverage Threshold
+              if: ${{ steps.coverage.outputs.coverage < 90 }}
+              run: |
+                echo "Code coverage is below the threshold of 90%!"
+                exit 1

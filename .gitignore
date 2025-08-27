@@ -8,5 +8,4 @@ build/
 .pytest_cache/
 .mypy_cache/
 Pipfile.lock
-coverage.xml
-result.xml
+reports/
